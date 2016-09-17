@@ -1,0 +1,19 @@
+[buildfile]
+  includes = //buck-tools/default.defs
+
+[plugins]
+  directory = //bucklets/plugins
+
+[java]
+  source_level = 8
+  target_level = 8
+
+[alias]
+    onos = //tools/package:onos-run
+    package = //tools/package:onos-package
+
+[download]
+  in_build = true
+
+[maven_repositories]
+  central = https://repo.maven.apache.org/maven2
