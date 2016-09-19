@@ -68,7 +68,7 @@ public class BgpExtendedCommunity implements BgpValueType {
 
         ChannelBuffer tempCb = cb.copy();
         Validation validation = Validation.parseAttributeHeader(cb);
-        List<BgpValueType> fsActionTlvs = new LinkedList<>();
+        List<BgpValueType> bgpExtComTlvs = new LinkedList<>();
 
         if (cb.readableBytes() < validation.getLength()) {
             Validation.validateLen(BgpErrorType.UPDATE_MESSAGE_ERROR, BgpErrorType.ATTRIBUTE_LENGTH_ERROR,
@@ -84,33 +84,35 @@ public class BgpExtendedCommunity implements BgpValueType {
 
         ChannelBuffer tempBuf = cb.readBytes(validation.getLength());
         if (tempBuf.readableBytes() > 0) {
-            BgpValueType fsActionTlv = null;
-            ChannelBuffer actionBuf = tempBuf.readBytes(validation.getLength());
+            BgpValueType bgpExtComTlv = null;
+            ChannelBuffer bgpExtComBuf = tempBuf.readBytes(validation.getLength());
 
-            while (actionBuf.readableBytes() > 0) {
-                short actionType = actionBuf.readShort();
-                switch (actionType) {
+            while (bgpExtComBuf.readableBytes() > 0) {
+                short type = bgpExtComBuf.readShort();
+                switch (type) {
+                    case Constants.BGP_ROUTE_TARGET:
+                        bgpExtComTlv = RouteTarget.read(bgpExtComBuf);
                     case Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_ACTION:
-                        fsActionTlv = BgpFsActionTrafficAction.read(actionBuf);
+                        bgpExtComTlv = BgpFsActionTrafficAction.read(bgpExtComBuf);
                         break;
                     case Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_MARKING:
-                        fsActionTlv = BgpFsActionTrafficMarking.read(actionBuf);
+                        bgpExtComTlv = BgpFsActionTrafficMarking.read(bgpExtComBuf);
                         break;
                     case Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_RATE:
-                        fsActionTlv = BgpFsActionTrafficRate.read(actionBuf);
+                        bgpExtComTlv = BgpFsActionTrafficRate.read(bgpExtComBuf);
                         break;
                     case Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_REDIRECT:
-                        fsActionTlv = BgpFsActionReDirect.read(actionBuf);
+                        bgpExtComTlv = BgpFsActionReDirect.read(bgpExtComBuf);
                         break;
-                    default: log.debug("Other type Not Supported:" + actionType);
+                    default: log.debug("Other type Not Supported:" + type);
                         break;
                 }
-                if (fsActionTlv != null) {
-                    fsActionTlvs.add(fsActionTlv);
+                if (bgpExtComTlv != null) {
+                    bgpExtComTlvs.add(bgpExtComTlv);
                 }
             }
         }
-        return new BgpExtendedCommunity(fsActionTlvs);
+        return new BgpExtendedCommunity(bgpExtComTlvs);
     }
 
     @Override

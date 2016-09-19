@@ -58,7 +58,8 @@ public class BgpConfig implements BgpCfg {
     private BgpPeerManagerImpl peerManager;
     private BgpController bgpController;
     private boolean rpdCapability;
-    private boolean vpnCapability;
+    private boolean vpnv4Capability;
+    private boolean evpnCapability;
 
     /*
      * Constructor to initialize the values.
@@ -132,12 +133,22 @@ public class BgpConfig implements BgpCfg {
 
     @Override
     public boolean vpnv4Capability() {
-        return this.vpnCapability;
+        return this.vpnv4Capability;
     }
 
     @Override
     public void setVpnv4Capability(boolean vpnCapability) {
-        this.vpnCapability = vpnCapability;
+        this.vpnv4Capability = vpnCapability;
+    }
+
+    @Override
+    public boolean evpnCapability() {
+        return this.vpnv4Capability;
+    }
+
+    @Override
+    public void setEvpnCapability(boolean evpnCapability) {
+        this.evpnCapability = evpnCapability;
     }
 
     @Override

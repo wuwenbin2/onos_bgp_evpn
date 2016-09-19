@@ -257,7 +257,7 @@ public class BgpPeerImpl implements BgpPeer {
         while (iterator.hasNext()) {
             BgpValueType attr = iterator.next();
             if (attr instanceof MpReachNlri) {
-                List<BgpLSNlri> nlri = ((MpReachNlri) attr).mpReachNlri();
+                List<BgpLSNlri> nlri = ((MpReachNlri) attr).bgpLSNlri();
                 callAdd(this, nlri, pathAttr);
             }
             if (attr instanceof MpUnReachNlri) {

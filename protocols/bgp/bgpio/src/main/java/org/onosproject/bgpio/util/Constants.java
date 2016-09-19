@@ -41,6 +41,8 @@ public final class Constants {
     public static final byte VPN_SAFI_FLOWSPEC_VALUE = (byte) 134;
     public static final short AFI_VPNV4_VALUE = 1;
     public static final byte SAFI_VPNV4_VALUE = (byte) 128;
+    public static final short AFI_EVPN_VALUE = 25;
+    public static final byte SAFI_EVPN_VALUE = (byte) 70;
 
     /* TODO: The Capability Code
    for this capability is to be specified by the IANA.*/
@@ -79,6 +81,7 @@ public final class Constants {
     public static final short BGP_FLOWSPEC_ACTION_TRAFFIC_ACTION = (short) 0x8007;
     public static final short BGP_FLOWSPEC_ACTION_TRAFFIC_REDIRECT = (short) 0x8008;
     public static final short BGP_FLOWSPEC_ACTION_TRAFFIC_MARKING = (short) 0x8009;
+    public static final short BGP_ROUTE_TARGET = (short) 0x01;
 
     public static final byte BGP_FLOW_SPEC_LEN_MASK = 0x30;
     public static final byte BGP_FLOW_SPEC_END_OF_LIST_MASK = (byte) 0x80;

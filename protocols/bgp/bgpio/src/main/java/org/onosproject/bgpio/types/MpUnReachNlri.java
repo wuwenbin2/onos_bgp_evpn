@@ -22,6 +22,7 @@ import java.util.ListIterator;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onosproject.bgpio.exceptions.BgpParseException;
+import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.BgpLSNlri;
 import org.onosproject.bgpio.protocol.flowspec.BgpFlowSpecNlri;
 import org.onosproject.bgpio.protocol.linkstate.BgpNodeLSNlriVer4;
@@ -46,9 +47,10 @@ public class MpUnReachNlri implements BgpValueType {
     private boolean isMpUnReachNlri = false;
     private final short afi;
     private final byte safi;
-    private final List<BgpLSNlri> mpUnReachNlri;
+    private List<BgpLSNlri> bgpLSNlri;
     private final int length;
     private BgpFlowSpecNlri bgpFlowSpecNlri;
+    private List<BgpEvpnNlri> evpnNlri;
 
     /**
      * Constructor to initialize parameters.
@@ -60,7 +62,7 @@ public class MpUnReachNlri implements BgpValueType {
      */
     public MpUnReachNlri(List<BgpLSNlri> mpUnReachNlri, short afi, byte safi,
                   int length) {
-        this.mpUnReachNlri = mpUnReachNlri;
+        this.bgpLSNlri = mpUnReachNlri;
         this.isMpUnReachNlri = true;
         this.afi = afi;
         this.safi = safi;
@@ -68,12 +70,29 @@ public class MpUnReachNlri implements BgpValueType {
     }
 
     public MpUnReachNlri(BgpFlowSpecNlri bgpFlowSpecNlri, short afi, byte safi) {
-        this.mpUnReachNlri = null;
         this.isMpUnReachNlri = true;
         this.length = 0;
         this.bgpFlowSpecNlri = bgpFlowSpecNlri;
         this.afi = afi;
         this.safi = safi;
+    }
+
+    public MpUnReachNlri(List<BgpEvpnNlri> evpnNlri, short afi, byte safi) {
+        this.isMpUnReachNlri = true;
+        this.length = 0;
+        this.evpnNlri = evpnNlri;
+        this.afi = afi;
+        this.safi = safi;
+    }
+
+
+    /**
+     * Returns list of Link State Nlri.
+     *
+     * @return list of Link State Nlri
+     */
+    public List<BgpLSNlri> bgpLSNlri() {
+        return this.bgpLSNlri;
     }
 
     /**
@@ -85,6 +104,14 @@ public class MpUnReachNlri implements BgpValueType {
         return this.bgpFlowSpecNlri;
     }
 
+    /**
+     * Returns BGP Evpn info.
+     *
+     * @return BGP Evpn info
+     */
+    public List<BgpEvpnNlri> bgpEvpnNlri() {
+        return this.evpnNlri;
+    }
     /**
      * Reads from ChannelBuffer and parses MpUnReachNlri.
      *
@@ -264,7 +291,7 @@ public class MpUnReachNlri implements BgpValueType {
      * @return list of MpUnReach Nlri
      */
     public List<BgpLSNlri> mpUnReachNlri() {
-        return this.mpUnReachNlri;
+        return this.bgpLSNlri;
     }
 
     /**
@@ -340,7 +367,7 @@ public class MpUnReachNlri implements BgpValueType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(getClass()).omitNullValues()
-                .add("mpReachNlri", mpUnReachNlri)
+                .add("mpReachNlri", bgpLSNlri)
                 .add("bgpFlowSpecNlri", bgpFlowSpecNlri)
                 .add("afi", afi)
                 .add("safi", safi)

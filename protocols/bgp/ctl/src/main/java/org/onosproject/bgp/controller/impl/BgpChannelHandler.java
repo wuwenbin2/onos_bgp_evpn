@@ -674,6 +674,7 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
         bgpId = Ip4Address.valueOf(bgpconfig.getRouterId()).toInt();
 
         boolean vpnv4Cability = bgpconfig.vpnv4Capability();
+        boolean evpnCability = bgpconfig.evpnCapability();
 
         if (flowSpec == BgpCfg.FlowSpec.IPV4) {
             flowSpecStatus = true;
@@ -691,7 +692,8 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
                 .setFlowSpecCapabilityTlv(flowSpecStatus)
                 .setVpnFlowSpecCapabilityTlv(vpnFlowSpecStatus)
                 .setFlowSpecRpdCapabilityTlv(bgpconfig.flowSpecRpdCapability())
-                .setVpnv4CapabilityTlv(vpnv4Cability).build();
+                .setVpnv4CapabilityTlv(vpnv4Cability)
+                .setEvpnCapabilityTlv(evpnCability).build();
         log.debug("Sending open message to {}", channel.getRemoteAddress());
         channel.write(Collections.singletonList(msg));
 

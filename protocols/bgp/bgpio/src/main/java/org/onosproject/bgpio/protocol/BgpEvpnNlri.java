@@ -13,8 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.onosproject.bgpio.protocol;
+
+import org.onosproject.bgpio.exceptions.BgpParseException;
 
 /**
- * BGP Protocol evpn components.
+ * Abstraction of an entity providing BGP-EVPN NLRI.
  */
-package org.onosproject.bgpio.protocol;
+public interface BgpEvpnNlri {
+
+    /**
+     * Returns route type in Nlri.
+     *
+     * @return route type in Nlri
+     * @throws BgpParseException while getting route type
+     */
+    RouteType getRouteType() throws BgpParseException;
+
+}

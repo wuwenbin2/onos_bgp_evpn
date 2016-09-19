@@ -133,22 +133,44 @@ public class BgpControllerImpl implements BgpController {
             }
             Iterator<BgpValueType> listIterator = pathAttr.iterator();
             boolean isLinkstate = false;
+            boolean isEvpn = false;
 
             while (listIterator.hasNext()) {
                 BgpValueType attr = listIterator.next();
+                // if (attr instanceof MpReachNlri) {
+                // MpReachNlri mpReach = (MpReachNlri) attr;
+                // if (mpReach.bgpFlowSpecNlri() == null) {
+                // isLinkstate = true;
+                // }
+                // } else if (attr instanceof MpUnReachNlri) {
+                // MpUnReachNlri mpUnReach = (MpUnReachNlri) attr;
+                // if (mpUnReach.bgpFlowSpecNlri() == null) {
+                // isLinkstate = true;
+                // }
+                // }
                 if (attr instanceof MpReachNlri) {
                     MpReachNlri mpReach = (MpReachNlri) attr;
-                    if (mpReach.bgpFlowSpecNlri() == null) {
+                    if (mpReach.bgpLSNlri() != null) {
                         isLinkstate = true;
+                    }
+                    if (mpReach.bgpEvpnNlri() != null) {
+                        isEvpn = true;
                     }
                 } else if (attr instanceof MpUnReachNlri) {
                     MpUnReachNlri mpUnReach = (MpUnReachNlri) attr;
-                    if (mpUnReach.bgpFlowSpecNlri() == null) {
+                    if (mpUnReach.bgpLSNlri() != null) {
                         isLinkstate = true;
+                    }
+                    if (mpUnReach.bgpEvpnNlri() != null) {
+                        isEvpn = true;
                     }
                 }
             }
             if (isLinkstate) {
+                peer.buildAdjRibIn(pathAttr);
+            }
+
+            if (isEvpn) {
                 peer.buildAdjRibIn(pathAttr);
             }
             break;

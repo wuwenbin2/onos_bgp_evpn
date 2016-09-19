@@ -128,6 +128,7 @@ public class BgpCfgProvider extends AbstractProvider {
         bgpConfig.setMaxSession(config.maxSession());
         bgpConfig.setLargeASCapability(config.largeAsCapability());
         bgpConfig.setVpnv4Capability(config.vpnv4Capability());
+        bgpConfig.setEvpnCapability(config.evpnCapability());
 
         if (config.flowSpecCapability().equals("IPV4")) {
             bgpConfig.setFlowSpecCapability(BgpCfg.FlowSpec.IPV4);
@@ -179,6 +180,7 @@ public class BgpCfgProvider extends AbstractProvider {
         bgpConfig.setMaxSession(config.maxSession());
         bgpConfig.setLargeASCapability(config.largeAsCapability());
         bgpConfig.setVpnv4Capability(config.vpnv4Capability());
+        bgpConfig.setEvpnCapability(config.evpnCapability());
 
         if (config.flowSpecCapability().equals("IPV4")) {
             bgpConfig.setFlowSpecCapability(BgpCfg.FlowSpec.IPV4);
