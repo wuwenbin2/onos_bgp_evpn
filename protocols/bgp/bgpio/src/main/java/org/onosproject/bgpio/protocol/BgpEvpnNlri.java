@@ -16,6 +16,7 @@
 package org.onosproject.bgpio.protocol;
 
 import org.onosproject.bgpio.exceptions.BgpParseException;
+import org.onosproject.bgpio.protocol.evpn.RouteTypeSpec;
 
 /**
  * Abstraction of an entity providing BGP-EVPN NLRI.
@@ -29,5 +30,13 @@ public interface BgpEvpnNlri {
      * @throws BgpParseException while getting route type
      */
     RouteType getRouteType() throws BgpParseException;
+
+    /**
+     * Returns route type spefi Nlri.
+     *
+     * @return route type in Nlri
+     * @throws BgpParseException while getting route type
+     */
+    RouteTypeSpec getRouteTypeSpefic();
 
 }

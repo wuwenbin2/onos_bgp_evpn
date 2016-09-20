@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
-public class BgpMacIpAdvNlriVer4 implements RouteTypeSpefic {
+public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
 
     /*
      * REFERENCE : RFC 7432 BGP MPLS-Based Ethernet VPN

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package org.onosproject.bgpio.protocol.evpn;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.protocol.BgpEvpnNlri;
@@ -50,7 +49,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
     public static final int TYPE_AND_LEN = 4;
     private byte routeType;
     private byte length;
-    private RouteTypeSpefic routeTypeSpefic;
+    private RouteTypeSpec routeTypeSpec;
 
     /**
      * Resets parameters.
@@ -58,7 +57,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
     public BgpEvpnNlriVer4() {
         this.routeType = 2;
         this.length = 0;
-        this.routeTypeSpefic = null;
+        this.routeTypeSpec = null;
 
     }
 
@@ -72,10 +71,10 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
      * @param isVpn vpn availability in message
      */
     public BgpEvpnNlriVer4(byte routeType, byte length,
-                           RouteTypeSpefic routeTypeSpefic) {
+                           RouteTypeSpec routeTypeSpefic) {
         this.routeType = routeType;
         this.length = length;
-        this.routeTypeSpefic = routeTypeSpefic;
+        this.routeTypeSpec = routeTypeSpefic;
     }
 
     /**
@@ -90,7 +89,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
     public static BgpEvpnNlriVer4 read(ChannelBuffer cb)
             throws BgpParseException {
 
-        RouteTypeSpefic routeTypeSpefic = null;
+        RouteTypeSpec routeTypeSpefic = null;
 
         if (cb.readableBytes() > 0) {
             ChannelBuffer tempBuf = cb.copy();
@@ -118,6 +117,11 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
     }
 
     @Override
+    public RouteTypeSpec getRouteTypeSpefic() {
+        return routeTypeSpec;
+    }
+
+    @Override
     public RouteType getRouteType() throws BgpParseException {
         switch (routeType) {
         case 1:
@@ -138,7 +142,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
     public String toString() {
         return MoreObjects.toStringHelper(getClass()).omitNullValues()
                 .add("routeType", routeType).add("length", length)
-                .add("routeTypeSpefic ", routeTypeSpefic).toString();
+                .add("routeTypeSpefic ", routeTypeSpec).toString();
     }
 
     @Override
@@ -151,7 +155,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
         int iLenStartIndex = cb.writerIndex();
         cb.writeShort(routeType);
         cb.writeByte(length);
-        routeTypeSpefic.write(cb);
+        routeTypeSpec.write(cb);
         return cb.writerIndex() - iLenStartIndex;
     }
 
@@ -160,4 +164,6 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
         return 0;
     }
 
+
 }
+
