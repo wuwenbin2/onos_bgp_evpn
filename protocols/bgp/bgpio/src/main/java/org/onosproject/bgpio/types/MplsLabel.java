@@ -2,11 +2,14 @@ package org.onosproject.bgpio.types;
 
 import java.util.Objects;
 import org.jboss.netty.buffer.ChannelBuffer;
+
+import com.google.common.base.FinalizablePhantomReference;
 import com.google.common.base.MoreObjects;
 
 public class MplsLabel implements Comparable<MplsLabel> {
 
-    private String mplsLabel;
+    public static final int MPLS_LABEL_LENGTH = 3;
+    private byte[] mplsLabel;
 
     /**
      * Resets fields.
@@ -18,37 +21,34 @@ public class MplsLabel implements Comparable<MplsLabel> {
     /**
      * Constructor to initialize parameters.
      *
-     * @param routeDistinguisher route distinguisher
+     * @param mplsLabel mpls label
      */
-    public MplsLabel(String mplslabel) {
+    public MplsLabel(byte[] mplslabel) {
         this.mplsLabel = mplslabel;
     }
 
     /**
-     * Reads route distinguisher from channelBuffer.
+     * Reads mpls label from channelBuffer.
      *
      * @param cb channelBuffer
-     * @return object of RouteDistinguisher
+     * @return object of mpls label
      */
     public static MplsLabel read(ChannelBuffer cb) {
-        return new MplsLabel(cb.readBytes(3).toString());
+        return new MplsLabel(cb.readBytes(3).array());
     }
 
     /**
-     * Returns route distinguisher.
+     * Returns mpls label.
      *
-     * @return route distinguisher
+     * @return mpls label
      */
-    public String getMplsLabel() {
+    public byte[] getMplsLabel() {
         return this.mplsLabel;
     }
 
     @Override
     public int compareTo(MplsLabel mplsLabel) {
-        if (this.equals(mplsLabel)) {
-            return 0;
-        }
-        return ((this.getMplsLabel())).compareTo((mplsLabel.getMplsLabel()));
+        return 0;
     }
 
     @Override
@@ -77,7 +77,6 @@ public class MplsLabel implements Comparable<MplsLabel> {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(getClass())
-                .add("mplsLabel", mplsLabel)
-                .toString();
+                .add("mplsLabel", mplsLabel).toString();
     }
 }

@@ -23,9 +23,11 @@ import com.google.common.base.MoreObjects;
 /**
  * Implementation of EthernetSegmentidentifier.
  */
-public class EthernetSegmentidentifier implements Comparable<EthernetSegmentidentifier> {
+public class EthernetSegmentidentifier
+        implements Comparable<EthernetSegmentidentifier> {
 
-    private String ethernetSegmentidentifier;
+    public static final int ESI_LENGTH = 10;
+    private byte[] ethernetSegmentidentifier;
 
     /**
      * Resets fields.
@@ -39,7 +41,7 @@ public class EthernetSegmentidentifier implements Comparable<EthernetSegmentiden
      *
      * @param ethernetSegmentidentifier Ethernet Segment identifier
      */
-    public EthernetSegmentidentifier(String ethernetSegmentidentifier) {
+    public EthernetSegmentidentifier(byte[] ethernetSegmentidentifier) {
         this.ethernetSegmentidentifier = ethernetSegmentidentifier;
     }
 
@@ -50,7 +52,7 @@ public class EthernetSegmentidentifier implements Comparable<EthernetSegmentiden
      * @return object of EthernetSegmentidentifier
      */
     public static EthernetSegmentidentifier read(ChannelBuffer cb) {
-        return new EthernetSegmentidentifier(cb.readBytes(10).toString());
+        return new EthernetSegmentidentifier(cb.readBytes(10).array());
     }
 
     /**
@@ -58,17 +60,8 @@ public class EthernetSegmentidentifier implements Comparable<EthernetSegmentiden
      *
      * @return Ethernet Segment identifier.
      */
-    public String getEthernetSegmentidentifier() {
+    public byte[] getEthernetSegmentidentifier() {
         return this.ethernetSegmentidentifier;
-    }
-
-    @Override
-    public int compareTo(EthernetSegmentidentifier rd) {
-        if (this.equals(rd)) {
-            return 0;
-        }
-        return ((this.getEthernetSegmentidentifier()))
-                .compareTo((rd.getEthernetSegmentidentifier()));
     }
 
     @Override
@@ -97,5 +90,10 @@ public class EthernetSegmentidentifier implements Comparable<EthernetSegmentiden
         return MoreObjects.toStringHelper(getClass())
                 .add("ethernetSegmentidentifier", ethernetSegmentidentifier)
                 .toString();
+    }
+
+    @Override
+    public int compareTo(EthernetSegmentidentifier rd) {
+        return 0;
     }
 }
