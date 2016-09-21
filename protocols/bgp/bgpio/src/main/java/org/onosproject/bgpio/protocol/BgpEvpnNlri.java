@@ -16,6 +16,7 @@
 package org.onosproject.bgpio.protocol;
 
 import org.onosproject.bgpio.exceptions.BgpParseException;
+import org.onosproject.bgpio.protocol.evpn.RouteType;
 import org.onosproject.bgpio.protocol.evpn.RouteTypeSpec;
 import org.onosproject.bgpio.types.BgpValueType;
 

@@ -6,7 +6,6 @@ import java.net.InetAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onlab.packet.MacAddress;
 import org.onosproject.bgpio.exceptions.BgpParseException;
-import org.onosproject.bgpio.protocol.RouteType;
 import org.onosproject.bgpio.types.EthernetSegmentidentifier;
 import org.onosproject.bgpio.types.MplsLabel;
 import org.onosproject.bgpio.types.RouteDistinguisher;

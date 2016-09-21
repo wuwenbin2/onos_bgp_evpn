@@ -18,7 +18,6 @@ package org.onosproject.bgpio.protocol.evpn;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.protocol.BgpEvpnNlri;
-import org.onosproject.bgpio.protocol.RouteType;
 import org.onosproject.bgpio.types.BgpErrorType;
 import org.onosproject.bgpio.util.Constants;
 import org.slf4j.Logger;

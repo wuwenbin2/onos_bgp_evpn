@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.onosproject.bgpio.protocol;
+package org.onosproject.bgpio.protocol.evpn;
 
 /**
  * Enum to provide EVPN RouteType.

@@ -114,6 +114,52 @@ public class MpUnReachNlri implements BgpValueType {
     public List<BgpEvpnNlri> bgpEvpnNlri() {
         return this.evpnNlri;
     }
+
+    /**
+     * Returns afi.
+     *
+     * @return afi
+     */
+    public short getAfi() {
+        return this.afi;
+    }
+
+    /**
+     * Returns safi.
+     *
+     * @return safi
+     */
+    public byte getSafi() {
+        return this.safi();
+    }
+
+    /**
+     * Returns mpUnReachNlri details type.
+     *
+     * @return type
+     */
+    public NlriDetailsType getNlriDetailsType() {
+        if ((this.afi == Constants.AFI_VALUE)
+                && (this.safi == Constants.SAFI_VALUE)
+                || (this.afi == Constants.AFI_VALUE)
+                        && (this.safi == Constants.VPN_SAFI_VALUE)) {
+            return NlriDetailsType.LINK_STATE;
+        }
+
+        if ((afi == Constants.AFI_FLOWSPEC_VALUE)
+                && ((safi == Constants.SAFI_FLOWSPEC_VALUE)
+                        || (safi == Constants.VPN_SAFI_FLOWSPEC_VALUE))) {
+            return NlriDetailsType.FLOW_SPEIC;
+        }
+
+        if ((afi == Constants.AFI_EVPN_VALUE)
+                && (safi == Constants.SAFI_EVPN_VALUE)) {
+            return NlriDetailsType.EVPN;
+        }
+
+        return null;
+    }
+
     /**
      * Reads from ChannelBuffer and parses MpUnReachNlri.
      *

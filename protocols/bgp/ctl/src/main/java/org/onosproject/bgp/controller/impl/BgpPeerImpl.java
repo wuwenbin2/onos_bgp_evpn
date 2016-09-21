@@ -26,6 +26,7 @@ import org.onosproject.bgp.controller.BgpLocalRib;
 import org.onosproject.bgp.controller.BgpPeer;
 import org.onosproject.bgp.controller.BgpSessionInfo;
 import org.onosproject.bgpio.exceptions.BgpParseException;
+import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.BgpFactories;
 import org.onosproject.bgpio.protocol.BgpFactory;
 import org.onosproject.bgpio.protocol.BgpLSNlri;
@@ -257,12 +258,34 @@ public class BgpPeerImpl implements BgpPeer {
         while (iterator.hasNext()) {
             BgpValueType attr = iterator.next();
             if (attr instanceof MpReachNlri) {
-                List<BgpLSNlri> nlri = ((MpReachNlri) attr).bgpLSNlri();
-                callAdd(this, nlri, pathAttr);
+                MpReachNlri mpReachNlri = (MpReachNlri) attr;
+                switch (mpReachNlri.getNlriDetailsType()) {
+                case LINK_STATE:
+                    List<BgpLSNlri> lsNlri = ((MpReachNlri) attr).bgpLSNlri();
+                    callAdd(this, lsNlri, pathAttr);
+                    break;
+                case EVPN:
+                    List<BgpEvpnNlri> evpnNlri = ((MpReachNlri) attr).bgpEvpnNlri();
+                    break;
+                default:
+                    break;
+                }
+
             }
             if (attr instanceof MpUnReachNlri) {
-                List<BgpLSNlri> nlri = ((MpUnReachNlri) attr).mpUnReachNlri();
-                callRemove(this, nlri);
+                MpReachNlri mpUnReachNlri = (MpReachNlri) attr;
+                switch (mpUnReachNlri.getNlriDetailsType()) {
+                case LINK_STATE:
+                    List<BgpLSNlri> lsNlri = ((MpUnReachNlri) attr).bgpLSNlri();
+                    callRemove(this, lsNlri);
+                    break;
+                case EVPN:
+                    List<BgpEvpnNlri> evpnNlri = ((MpUnReachNlri) attr).bgpEvpnNlri();
+                    break;
+                default:
+                    break;
+
+                }
             }
         }
     }
