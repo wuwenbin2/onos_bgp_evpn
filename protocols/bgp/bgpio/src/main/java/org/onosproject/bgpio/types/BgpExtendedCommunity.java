@@ -158,7 +158,10 @@ public class BgpExtendedCommunity implements BgpValueType {
 
         while (listIterator.hasNext()) {
             BgpValueType fsTlv = listIterator.next();
-            if (fsTlv.getType() == Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_ACTION) {
+            if (fsTlv.getType() == Constants.BGP_ROUTE_TARGET) {
+                RouteTarget routeTarget = (RouteTarget) fsTlv;
+                routeTarget.write(cb);
+            } else if (fsTlv.getType() == Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_ACTION) {
                 BgpFsActionTrafficAction trafficAction = (BgpFsActionTrafficAction) fsTlv;
                 trafficAction.write(cb);
             } else if (fsTlv.getType() == Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_MARKING) {
