@@ -85,10 +85,10 @@ public class MpReachNlri implements BgpValueType {
         this.safi = safi;
     }
 
-    public MpReachNlri(List<BgpEvpnNlri> evpnNlri, short afi, byte safi) {
+    public MpReachNlri(List<BgpEvpnNlri> evpnNlri, short afi, byte safi, Ip4Address ipNextHop) {
         this.bgpLSNlri = null;
         this.length = 0;
-        this.ipNextHop = null;
+        this.ipNextHop = ipNextHop;
         this.isMpReachNlri = true;
         this.evpnNlri = evpnNlri;
         this.afi = afi;
@@ -298,11 +298,21 @@ public class MpReachNlri implements BgpValueType {
             } else if ((afi == Constants.AFI_EVPN_VALUE)
                     && (safi == Constants.SAFI_EVPN_VALUE)) {
                 List<BgpEvpnNlri> eVpnComponents = new LinkedList<>();
+
+                byte nextHopLen = tempCb.readByte();
+                InetAddress ipAddress = Validation.toInetAddress(nextHopLen,
+                                                                 tempCb);
+                if (ipAddress.isMulticastAddress()) {
+                    throw new BgpParseException("Multicast not supported");
+                }
+                ipNextHop = Ip4Address.valueOf(ipAddress);
+
                 while (tempCb.readableBytes() > 0) {
                     BgpEvpnNlri eVpnComponent = BgpEvpnNlriVer4.read(tempCb);
                     eVpnComponents.add(eVpnComponent);
                 }
-                return new MpReachNlri(eVpnComponents, afi, safi);
+
+                return new MpReachNlri(eVpnComponents, afi, safi, ipNextHop);
             } else {
                 throw new BgpParseException("Not Supporting afi " + afi
                         + "safi " + safi);
@@ -398,11 +408,9 @@ public class MpReachNlri implements BgpValueType {
 
             int mpReachDataIndx = cb.writerIndex();
             cb.writeShort(0);
-
             cb.writeShort(afi);
             cb.writeByte(safi);
-            //next hop address
-            cb.writeByte(0);
+            cb.writeInt(ipNextHop.toInt());
 
             for (BgpEvpnNlri element : evpnNlri) {
                 short routeType = element.getType();
@@ -423,8 +431,10 @@ public class MpReachNlri implements BgpValueType {
                 default:
                     break;
                 }
-
             }
+
+            int evpnNlriLen = cb.writerIndex() - mpReachDataIndx;
+            cb.setShort(mpReachDataIndx, (short) (evpnNlriLen - 2));
         }
 
         return cb.writerIndex() - iLenStartIndex;

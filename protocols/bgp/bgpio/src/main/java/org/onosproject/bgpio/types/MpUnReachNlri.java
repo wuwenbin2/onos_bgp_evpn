@@ -24,6 +24,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.BgpLSNlri;
+import org.onosproject.bgpio.protocol.evpn.BgpEvpnNlriVer4;
 import org.onosproject.bgpio.protocol.evpn.BgpMacIpAdvNlriVer4;
 import org.onosproject.bgpio.protocol.flowspec.BgpFlowSpecNlri;
 import org.onosproject.bgpio.protocol.linkstate.BgpNodeLSNlriVer4;
@@ -254,6 +255,16 @@ public class MpUnReachNlri implements BgpValueType {
                 BgpFlowSpecNlri flowSpecDetails = new BgpFlowSpecNlri(flowSpecComponents);
                 flowSpecDetails.setRouteDistinguiher(routeDistinguisher);
                 return new MpUnReachNlri(flowSpecDetails, afi, safi);
+            } else if ((afi == Constants.AFI_EVPN_VALUE)
+                    && (safi == Constants.SAFI_EVPN_VALUE)) {
+                List<BgpEvpnNlri> eVpnComponents = new LinkedList<>();
+
+                while (tempCb.readableBytes() > 0) {
+                    BgpEvpnNlri eVpnComponent = BgpEvpnNlriVer4.read(tempCb);
+                    eVpnComponents.add(eVpnComponent);
+                }
+
+                return new MpUnReachNlri(eVpnComponents, afi, safi);
             } else {
                 //TODO: check with the values got from capability
                 throw new BgpParseException("Not Supporting afi " + afi + "safi " + safi);
@@ -357,7 +368,8 @@ public class MpUnReachNlri implements BgpValueType {
 
             cb.writeByte(FLAGS);
             cb.writeByte(MPUNREACHNLRI_TYPE);
-            int mpUnReachIndx = cb.writerIndex();
+
+            int mpReachDataIndx = cb.writerIndex();
             cb.writeShort(0);
             cb.writeShort(afi);
             cb.writeByte(safi);
@@ -382,6 +394,9 @@ public class MpUnReachNlri implements BgpValueType {
                     break;
                 }
             }
+
+            int evpnNlriLen = cb.writerIndex() - mpReachDataIndx;
+            cb.setShort(mpReachDataIndx, (short) (evpnNlriLen - 2));
         }
         return cb.writerIndex() - iLenStartIndex;
     }

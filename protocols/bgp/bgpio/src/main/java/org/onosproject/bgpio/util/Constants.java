@@ -87,7 +87,7 @@ public final class Constants {
     public static final byte BGP_FLOW_SPEC_END_OF_LIST_MASK = (byte) 0x80;
 
     // for EVPN rt is waiting for modification
-    public static final short BGP_ROUTE_TARGET= (short) 0x00;
+    public static final short BGP_ROUTE_TARGET = (short) 0x00;
     public static final short BGP_ROUTE_TARGET_1 = (short) 0x01;
     public static final short BGP_ROUTE_TARGET_2 = (short) 0x02;
     public static final short BGP_EVPN_ETHERNET_AUTO_DISCOVERY = (short) 0x01;

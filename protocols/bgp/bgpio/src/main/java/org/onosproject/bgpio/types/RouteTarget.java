@@ -26,13 +26,13 @@ import com.google.common.base.MoreObjects;
 public class RouteTarget implements BgpValueType {
 
     /*
-     * Type 0x00: Local Administrator sub-field uses 2 octets with AS number and
-     * Assigned number uses 4 octests 
-     * Type 0x01: Local Administrator sub-field uses 4 octets with IP address and 
-     * Assigned number uses 2 octests 
-     * Type 0x02: Local Administrator sub-field uses 4 octets with AS number and
-     * Assigned number uses 2 octests
-     * Default RT's format is 100:1 with type 0;
+     Type 0x00: Local Administrator sub-field uses 2 octets with AS number and
+     Assigned number uses 4 octests
+     Type 0x01: Local Administrator sub-field uses 4 octets with IP address and
+     Assigned number uses 2 octests
+     Type 0x02: Local Administrator sub-field uses 4 octets with AS number and
+     Assigned number uses 2 octests
+     Default RT's format is 100:1 with type 0;
      */
     public static final short TYPE = Constants.BGP_ROUTE_TARGET;
     private long routeTarget;
