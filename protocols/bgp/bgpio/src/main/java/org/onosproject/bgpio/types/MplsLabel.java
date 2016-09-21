@@ -2,8 +2,6 @@ package org.onosproject.bgpio.types;
 
 import java.util.Objects;
 import org.jboss.netty.buffer.ChannelBuffer;
-
-import com.google.common.base.FinalizablePhantomReference;
 import com.google.common.base.MoreObjects;
 
 public class MplsLabel implements Comparable<MplsLabel> {

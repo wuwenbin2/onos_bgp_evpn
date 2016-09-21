@@ -17,11 +17,12 @@ package org.onosproject.bgpio.protocol;
 
 import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.protocol.evpn.RouteTypeSpec;
+import org.onosproject.bgpio.types.BgpValueType;
 
 /**
  * Abstraction of an entity providing BGP-EVPN NLRI.
  */
-public interface BgpEvpnNlri {
+public interface BgpEvpnNlri extends BgpValueType {
 
     /**
      * Returns route type in Nlri.
@@ -32,11 +33,19 @@ public interface BgpEvpnNlri {
     RouteType getRouteType() throws BgpParseException;
 
     /**
-     * Returns route type spefi Nlri.
+     * Returns route type specific Nlri.
      *
      * @return route type in Nlri
      * @throws BgpParseException while getting route type
      */
-    RouteTypeSpec getRouteTypeSpefic();
+    RouteTypeSpec getRouteTypeSpec();
+
+    /**
+     * Returns length.
+     *
+     * @return lengthin Nlri
+     * @throws BgpParseException while getting route type
+     */
+    byte getLength();
 
 }

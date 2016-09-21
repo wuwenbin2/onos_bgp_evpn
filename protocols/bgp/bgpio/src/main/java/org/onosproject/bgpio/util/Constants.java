@@ -81,8 +81,16 @@ public final class Constants {
     public static final short BGP_FLOWSPEC_ACTION_TRAFFIC_ACTION = (short) 0x8007;
     public static final short BGP_FLOWSPEC_ACTION_TRAFFIC_REDIRECT = (short) 0x8008;
     public static final short BGP_FLOWSPEC_ACTION_TRAFFIC_MARKING = (short) 0x8009;
-    public static final short BGP_ROUTE_TARGET = (short) 0x01;
+
 
     public static final byte BGP_FLOW_SPEC_LEN_MASK = 0x30;
     public static final byte BGP_FLOW_SPEC_END_OF_LIST_MASK = (byte) 0x80;
+
+    // for EVPN
+    public static final short BGP_ROUTE_TARGET = (short) 0x01;
+    public static final short BGP_EVPN_ETHERNET_AUTO_DISCOVERY = (short) 0x01;
+    public static final short BGP_EVPN_MAC_IP_ADVERTISEMENT = (short) 0x02;
+    public static final short BGP_EVPN_INCLUSIVE_MULTICASE_ETHERNET = (short) 0x03;
+    public static final short BGP_EVPN_ETHERNET_SEGMENT = (short) 0x04;
+
 }

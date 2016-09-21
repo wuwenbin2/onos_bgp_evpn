@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 package org.onosproject.bgpio.protocol.evpn;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.RouteType;
 import org.onosproject.bgpio.types.BgpErrorType;
-import org.onosproject.bgpio.types.BgpValueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ import com.google.common.base.MoreObjects;
 /**
  * Implementation of Evpn NLRI.
  */
-public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
+public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
 
     /*
      * REFERENCE : RFC 7432 BGP MPLS-Based Ethernet VPN
@@ -117,7 +117,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
     }
 
     @Override
-    public RouteTypeSpec getRouteTypeSpefic() {
+    public RouteTypeSpec getRouteTypeSpec() {
         return routeTypeSpec;
     }
 
@@ -148,6 +148,11 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri, BgpValueType {
     @Override
     public short getType() {
         return routeType;
+    }
+
+    @Override
+    public byte getLength() {
+        return length;
     }
 
     @Override

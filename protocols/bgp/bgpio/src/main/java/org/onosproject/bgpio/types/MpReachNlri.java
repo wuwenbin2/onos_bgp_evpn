@@ -27,6 +27,7 @@ import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.BgpLSNlri;
 import org.onosproject.bgpio.protocol.evpn.BgpEvpnNlriVer4;
+import org.onosproject.bgpio.protocol.evpn.BgpMacIpAdvNlriVer4;
 import org.onosproject.bgpio.protocol.flowspec.BgpFlowSpecNlri;
 import org.onosproject.bgpio.protocol.linkstate.BgpNodeLSNlriVer4;
 import org.onosproject.bgpio.protocol.linkstate.BgpLinkLsNlriVer4;
@@ -389,6 +390,41 @@ public class MpReachNlri implements BgpValueType {
             int fsNlriLen = cb.writerIndex() - mpReachDataIndx;
             cb.setShort(mpReachDataIndx, (short) (fsNlriLen - 2));
 
+        } else if ((afi == Constants.AFI_EVPN_VALUE)
+                && (safi == Constants.SAFI_EVPN_VALUE)) {
+
+            cb.writeByte(FLAGS);
+            cb.writeByte(MPREACHNLRI_TYPE);
+
+            int mpReachDataIndx = cb.writerIndex();
+            cb.writeShort(0);
+
+            cb.writeShort(afi);
+            cb.writeByte(safi);
+            //next hop address
+            cb.writeByte(0);
+
+            for (BgpEvpnNlri element : evpnNlri) {
+                short routeType = element.getType();
+                switch (routeType) {
+                case Constants.BGP_EVPN_MAC_IP_ADVERTISEMENT:
+                    cb.writeByte(element.getType());
+                    cb.writeByte(element.getLength());
+                    BgpMacIpAdvNlriVer4 macIpAdvNlri = (BgpMacIpAdvNlriVer4) element
+                            .getRouteTypeSpec();
+                    macIpAdvNlri.write(cb);
+                    break;
+                case Constants.BGP_EVPN_ETHERNET_AUTO_DISCOVERY:
+                    break;
+                case Constants.BGP_EVPN_INCLUSIVE_MULTICASE_ETHERNET:
+                    break;
+                case Constants.BGP_EVPN_ETHERNET_SEGMENT:
+                    break;
+                default:
+                    break;
+                }
+
+            }
         }
 
         return cb.writerIndex() - iLenStartIndex;
