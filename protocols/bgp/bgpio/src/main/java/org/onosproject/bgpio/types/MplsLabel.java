@@ -36,6 +36,18 @@ public class MplsLabel implements Comparable<MplsLabel> {
     }
 
     /**
+     * writes mpls label into channelBuffer.
+     *
+     * @param cb channelBuffer
+     * @return length length of written data
+     */
+    public int write(ChannelBuffer cb) {
+        int iLenStartIndex = cb.writerIndex();
+        cb.writeBytes(mplsLabel);
+        return cb.writerIndex() - iLenStartIndex;
+    }
+
+    /**
      * Returns mpls label.
      *
      * @return mpls label

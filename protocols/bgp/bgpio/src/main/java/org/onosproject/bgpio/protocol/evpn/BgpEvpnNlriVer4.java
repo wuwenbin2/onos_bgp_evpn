@@ -20,6 +20,7 @@ import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.RouteType;
 import org.onosproject.bgpio.types.BgpErrorType;
+import org.onosproject.bgpio.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,8 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     protected static final Logger log = LoggerFactory
             .getLogger(BgpEvpnNlriVer4.class);
 
-    public static final int TYPE_AND_LEN = 4;
+    // total length of route type and length
+    public static final short TYPE_AND_LEN = 2;
     private byte routeType;
     private byte length;
     private RouteTypeSpec routeTypeSpec;
@@ -62,13 +64,11 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     }
 
     /**
-     * Constructor to initialize parameters for BGP PrefixLSNlri.
+     * Constructor to initialize parameters for BGP EvpnNlri.
      *
-     * @param identifier field in BGP PrefixLSNlri
-     * @param protocolId protocol Id
-     * @param bgpPrefixLSIdentifier prefix LS Identifier
-     * @param routeDistinguisher RouteDistinguisher
-     * @param isVpn vpn availability in message
+     * @param routeType route Type
+     * @param length length
+     * @param routeTypeSpefic route type specific
      */
     public BgpEvpnNlriVer4(byte routeType, byte length,
                            RouteTypeSpec routeTypeSpefic) {
@@ -78,13 +78,11 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     }
 
     /**
-     * Reads from channelBuffer and parses Prefix LS Nlri.
+     * Reads from channelBuffer and parses Evpn Nlri.
      *
      * @param cb ChannelBuffer
-     * @param afi Address family identifier
-     * @param safi Subsequent address family identifier
-     * @return object of BGPPrefixIPv4LSNlriVer4
-     * @throws BgpParseException while parsing Prefix LS Nlri
+     * @return object of BgpEvpnNlriVer4
+     * @throws BgpParseException while parsing Bgp Evpn Nlri
      */
     public static BgpEvpnNlriVer4 read(ChannelBuffer cb)
             throws BgpParseException {
@@ -124,13 +122,13 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     @Override
     public RouteType getRouteType() throws BgpParseException {
         switch (routeType) {
-        case 1:
+        case Constants.BGP_EVPN_ETHERNET_AUTO_DISCOVERY:
             return RouteType.ETHERNET_AUTO_DISCOVERY;
-        case 2:
+        case Constants.BGP_EVPN_MAC_IP_ADVERTISEMENT:
             return RouteType.MAC_IP_ADVERTISEMENT;
-        case 3:
+        case Constants.BGP_EVPN_INCLUSIVE_MULTICASE_ETHERNET:
             return RouteType.INCLUSIVE_MULTICASE_ETHERNET;
-        case 4:
+        case Constants.BGP_EVPN_ETHERNET_SEGMENT:
             return RouteType.ETHERNET_SEGMENT;
         default:
             throw new BgpParseException(BgpErrorType.UPDATE_MESSAGE_ERROR,
@@ -158,7 +156,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     @Override
     public int write(ChannelBuffer cb) {
         int iLenStartIndex = cb.writerIndex();
-        cb.writeShort(routeType);
+        cb.writeByte(routeType);
         cb.writeByte(length);
         routeTypeSpec.write(cb);
         return cb.writerIndex() - iLenStartIndex;

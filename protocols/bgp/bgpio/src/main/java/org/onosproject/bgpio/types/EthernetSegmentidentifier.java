@@ -56,6 +56,18 @@ public class EthernetSegmentidentifier
     }
 
     /**
+     * writes Ethernet Segment identifier into channelBuffer.
+     *
+     * @param cb channelBuffer
+     * @return length length of written data
+     */
+    public int write(ChannelBuffer cb) {
+        int iLenStartIndex = cb.writerIndex();
+        cb.writeBytes(ethernetSegmentidentifier);
+        return cb.writerIndex() - iLenStartIndex;
+    }
+
+    /**
      * Returns Ethernet Segment identifier.
      *
      * @return Ethernet Segment identifier.

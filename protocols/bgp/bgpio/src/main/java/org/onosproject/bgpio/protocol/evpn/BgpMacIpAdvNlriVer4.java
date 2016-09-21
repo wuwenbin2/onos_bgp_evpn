@@ -114,6 +114,14 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
     public int write(ChannelBuffer cb) {
         int iLenStartIndex = cb.writerIndex();
         cb.writeLong(routeDistinguisher.getRouteDistinguisher());
+        ethernetSegmentidentifier.write(cb);
+        cb.writeInt(ethernetTagID);
+        cb.writeByte(macAddressLength);
+        cb.writeBytes(macAddress.toBytes());
+        cb.writeByte(ipAddressLength);
+        cb.writeBytes(ipAddress.getAddress());
+        mplsLabel1.write(cb);
+        mplsLabel2.write(cb);
         return cb.writerIndex() - iLenStartIndex;
     }
 
