@@ -351,6 +351,7 @@ public class MpReachNlri implements BgpValueType {
                     throw new BgpParseException("Multicast not supported");
                 }
                 ipNextHop = Ip4Address.valueOf(ipAddress);
+                byte reserved = tempCb.readByte();
 
                 while (tempCb.readableBytes() > 0) {
                     BgpEvpnNlri eVpnComponent = BgpEvpnNlriVer4.read(tempCb);
@@ -456,6 +457,8 @@ public class MpReachNlri implements BgpValueType {
             cb.writeShort(afi);
             cb.writeByte(safi);
             cb.writeInt(ipNextHop.toInt());
+            //sub network points of attachment
+            cb.writeByte(0);
 
             for (BgpEvpnNlri element : evpnNlri) {
                 short routeType = element.getType();

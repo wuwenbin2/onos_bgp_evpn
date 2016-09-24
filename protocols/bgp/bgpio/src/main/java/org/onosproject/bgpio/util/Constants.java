@@ -86,13 +86,16 @@ public final class Constants {
     public static final byte BGP_FLOW_SPEC_LEN_MASK = 0x30;
     public static final byte BGP_FLOW_SPEC_END_OF_LIST_MASK = (byte) 0x80;
 
-    // for EVPN rt is waiting for modification
-    public static final short BGP_ROUTE_TARGET = (short) 0x00;
-    public static final short BGP_ROUTE_TARGET_1 = (short) 0x01;
-    public static final short BGP_ROUTE_TARGET_2 = (short) 0x02;
+    // for EVPN
+    public static final short BGP_ROUTE_TARGET_AS = (short) 0x0002;
+    public static final short BGP_ROUTE_TARGET_IP = (short) 0x0102;
+    public static final short BGP_ROUTE_TARGET_LARGEAS = (short) 0x0202;
     public static final short BGP_EVPN_ETHERNET_AUTO_DISCOVERY = (short) 0x01;
     public static final short BGP_EVPN_MAC_IP_ADVERTISEMENT = (short) 0x02;
     public static final short BGP_EVPN_INCLUSIVE_MULTICASE_ETHERNET = (short) 0x03;
     public static final short BGP_EVPN_ETHERNET_SEGMENT = (short) 0x04;
 
+    // for encapsulation in extended community
+    public static final short BGP_ENCAP = (short) 0x030c;
+    public static final short BGP_VXLAN_ENCAP = (short) 0x030c;
 }

@@ -17,13 +17,13 @@
 package org.onosproject.bgpio.types;
 
 import com.google.common.base.MoreObjects;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.util.Constants;
 import org.onosproject.bgpio.util.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -90,8 +90,14 @@ public class BgpExtendedCommunity implements BgpValueType {
             while (bgpExtComBuf.readableBytes() > 0) {
                 short type = bgpExtComBuf.readShort();
                 switch (type) {
-                    case Constants.BGP_ROUTE_TARGET:
-                        bgpExtComTlv = RouteTarget.read(bgpExtComBuf);
+                    case Constants.BGP_ROUTE_TARGET_AS:
+                    case Constants.BGP_ROUTE_TARGET_IP:
+                    case Constants.BGP_ROUTE_TARGET_LARGEAS:
+                        bgpExtComTlv = RouteTarget.read(type, bgpExtComBuf);
+                        break;
+                    case Constants.BGP_ENCAP:
+                        bgpExtComTlv = BgpEncap.read(bgpExtComBuf);
+                        break;
                     case Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_ACTION:
                         bgpExtComTlv = BgpFsActionTrafficAction.read(bgpExtComBuf);
                         break;
@@ -158,7 +164,8 @@ public class BgpExtendedCommunity implements BgpValueType {
 
         while (listIterator.hasNext()) {
             BgpValueType fsTlv = listIterator.next();
-            if (fsTlv.getType() == Constants.BGP_ROUTE_TARGET) {
+            if (fsTlv.getType() == Constants.BGP_ROUTE_TARGET_AS || fsTlv.getType() == Constants.BGP_ROUTE_TARGET_IP
+                    || fsTlv.getType() == Constants.BGP_ROUTE_TARGET_LARGEAS) {
                 RouteTarget routeTarget = (RouteTarget) fsTlv;
                 routeTarget.write(cb);
             } else if (fsTlv.getType() == Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_ACTION) {

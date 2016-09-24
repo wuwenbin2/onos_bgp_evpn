@@ -17,35 +17,29 @@
 package org.onosproject.bgpio.types;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.onosproject.bgpio.util.Constants;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 
 /**
- * Implementation of RouteTarget.
+ * Implementation of BgpEncap.
  */
-public class RouteTarget implements BgpValueType {
+public class BgpEncap implements BgpValueType {
 
-    /*
-     * Type 0x00: Local Administrator sub-field uses 2 octets with AS number and
-     * Assigned number uses 4 octests Type 0x01: Local Administrator sub-field
-     * uses 4 octets with IP address and Assigned number uses 2 octests Type
-     * 0x02: Local Administrator sub-field uses 4 octets with AS number and
-     * Assigned number uses 2 octests
-     */
-    private byte[] routeTarget;
-    private short type;
+    public static final short TYPE = Constants.BGP_ENCAP;
+    private int spec;
+    private short tunnelType;
 
-    public enum RouteTargetype {
+    public enum TunnelType {
+        VXLAN((byte) 8);
 
-        AS((short) 0x0002), IP((short) 0x0102), LARGEAS((short) 0x0202);
-        short value;
+        byte value;
 
         /**
          * Assign val with the value as the tunnel type.
          *
          * @param val tunnel type
          */
-        RouteTargetype(short val) {
+        TunnelType(byte val) {
             value = val;
         }
 
@@ -54,7 +48,7 @@ public class RouteTarget implements BgpValueType {
          *
          * @return route type
          */
-        public short getType() {
+        public byte getType() {
             return value;
         }
     }
@@ -62,9 +56,9 @@ public class RouteTarget implements BgpValueType {
     /**
      * Resets fields.
      */
-    public RouteTarget() {
-        this.type = 0;
-        this.routeTarget = null;
+    public BgpEncap() {
+        this.spec = 0;
+        this.tunnelType = TunnelType.VXLAN.getType();
     }
 
     /**
@@ -72,28 +66,37 @@ public class RouteTarget implements BgpValueType {
      *
      * @param routeTarget route target
      */
-    public RouteTarget(short type, byte[] routeTarget) {
-        this.type = type;
-        this.routeTarget = routeTarget;
+    public BgpEncap(int spec, short tunnelType) {
+        this.spec = spec;
+        this.tunnelType = tunnelType;
     }
 
     /**
-     * Reads route target from channelBuffer.
+     * Reads encapsulation from channelBuffer.
      *
      * @param cb channelBuffer
-     * @return object of RouteTarget
+     * @return object of BgpEncap
      */
-    public static RouteTarget read(short type, ChannelBuffer cb) {
-        return new RouteTarget(type, cb.readBytes(6).array());
+    public static BgpEncap read(ChannelBuffer cb) {
+        return new BgpEncap(cb.readInt(), cb.readShort());
     }
 
     /**
-     * Returns route target.
+     * Returns encapsulation spec.
      *
-     * @return route target
+     * @return encapsulation spec
      */
-    public byte[] getRouteTarget() {
-        return this.routeTarget;
+    public int getSpec() {
+        return this.spec;
+    }
+
+    /**
+     * Returns encapsulation tunnel type.
+     *
+     * @return encapsulation tunnel type
+     */
+    public short getTunnelType() {
+        return this.tunnelType;
     }
 
     @Override
@@ -102,10 +105,9 @@ public class RouteTarget implements BgpValueType {
             return true;
         }
 
-        if (obj instanceof RouteTarget) {
-            RouteTarget that = (RouteTarget) obj;
-            if (this.type == that.type
-                    && this.routeTarget == that.routeTarget) {
+        if (obj instanceof BgpEncap) {
+            BgpEncap that = (BgpEncap) obj;
+            if (this.spec == that.spec && this.tunnelType == that.tunnelType) {
                 return true;
             }
         }
@@ -114,25 +116,27 @@ public class RouteTarget implements BgpValueType {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(routeTarget);
+        // return Objects.hashCode(spec);
+        return 0;
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(getClass()).add("type", type)
-                .add("routeTarget", routeTarget).toString();
+        return MoreObjects.toStringHelper(getClass()).add("spec", spec)
+                .add("tunnelType", tunnelType).toString();
     }
 
     @Override
     public short getType() {
-        return type;
+        return TYPE;
     }
 
     @Override
     public int write(ChannelBuffer cb) {
         int iLenStartIndex = cb.writerIndex();
-        cb.writeShort(type);
-        cb.writeBytes(routeTarget);
+        cb.writeShort(TYPE);
+        cb.writeInt(spec);
+        cb.writeByte(tunnelType);
         return cb.writerIndex() - iLenStartIndex;
     }
 

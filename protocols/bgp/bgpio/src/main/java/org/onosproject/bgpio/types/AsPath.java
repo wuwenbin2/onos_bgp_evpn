@@ -63,11 +63,13 @@ public class AsPath implements BgpValueType {
     public static final byte ASPATH_SET_TYPE = 1;
     public static final byte ASPATH_SEQ_TYPE = 2;
     public static final byte ASNUM_SIZE = 2;
+    public static final byte LARGE_ASNUM_SIZE = 4;
     public static final byte FLAGS = (byte) 0x40;
 
     private boolean isAsPath = false;
     private List<Short> aspathSet;
     private List<Short> aspathSeq;
+    private byte asNumSize = ASNUM_SIZE;
 
     /**
      * Initialize Fields.
@@ -119,7 +121,7 @@ public class AsPath implements BgpValueType {
             byte pathSegType = tempBuf.readByte();
             //no of ASes
             byte pathSegLen = tempBuf.readByte();
-            int length = pathSegLen * ASNUM_SIZE;
+            int length = pathSegLen * LARGE_ASNUM_SIZE;
             if (tempBuf.readableBytes() < length) {
                 Validation.validateLen(BgpErrorType.UPDATE_MESSAGE_ERROR,
                         BgpErrorType.ATTRIBUTE_LENGTH_ERROR, length);
@@ -145,6 +147,18 @@ public class AsPath implements BgpValueType {
     @Override
     public short getType() {
         return ASPATH_TYPE;
+    }
+
+    public void setAsNumSize(boolean isLargeASCapability) {
+        if (isLargeASCapability) {
+            asNumSize = LARGE_ASNUM_SIZE;
+        } else {
+            asNumSize = ASNUM_SIZE;
+        }
+    }
+
+    public byte getAsNumSize() {
+        return asNumSize;
     }
 
     /**
