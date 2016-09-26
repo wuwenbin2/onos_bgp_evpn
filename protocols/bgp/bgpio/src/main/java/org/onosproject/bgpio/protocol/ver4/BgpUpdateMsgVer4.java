@@ -248,6 +248,11 @@ public class BgpUpdateMsgVer4 implements BgpUpdateMsg {
                     cb.writeShort(0);
                 }
 
+                if ((afi == Constants.AFI_EVPN_VALUE)
+                        && (safi == Constants.SAFI_EVPN_VALUE)) {
+                    cb.writeShort(0);
+                }
+
             }
 
             if (message.bgpPathAttributes != null) {

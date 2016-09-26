@@ -425,10 +425,13 @@ public class MpUnReachNlri implements BgpValueType {
                 switch (routeType) {
                 case Constants.BGP_EVPN_MAC_IP_ADVERTISEMENT:
                     cb.writeByte(element.getType());
-                    cb.writeByte(element.getLength());
+                    int iSpecStartIndex = cb.writerIndex();
+                    cb.writeByte(0);
                     BgpMacIpAdvNlriVer4 macIpAdvNlri = (BgpMacIpAdvNlriVer4) element
                             .getRouteTypeSpec();
                     macIpAdvNlri.write(cb);
+                    cb.setByte(iSpecStartIndex, (short) (cb.writerIndex()
+                            - iSpecStartIndex + 1));
                     break;
                 case Constants.BGP_EVPN_ETHERNET_AUTO_DISCOVERY:
                     break;

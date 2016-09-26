@@ -342,6 +342,7 @@ public class MpReachNlri implements BgpValueType {
                 return new MpReachNlri(flowSpecDetails, afi, safi);
             } else if ((afi == Constants.AFI_EVPN_VALUE)
                     && (safi == Constants.SAFI_EVPN_VALUE)) {
+
                 List<BgpEvpnNlri> eVpnComponents = new LinkedList<>();
 
                 byte nextHopLen = tempCb.readByte();
@@ -358,6 +359,8 @@ public class MpReachNlri implements BgpValueType {
                     eVpnComponents.add(eVpnComponent);
                 }
 
+                log.info("=======Receive evpn message======= components are {}, next hop is {}",
+                         eVpnComponents.toString(), ipNextHop);
                 return new MpReachNlri(eVpnComponents, afi, safi, ipNextHop);
             } else {
                 throw new BgpParseException("Not Supporting afi " + afi
@@ -465,10 +468,13 @@ public class MpReachNlri implements BgpValueType {
                 switch (routeType) {
                 case Constants.BGP_EVPN_MAC_IP_ADVERTISEMENT:
                     cb.writeByte(element.getType());
-                    cb.writeByte(element.getLength());
+                    int iSpecStartIndex = cb.writerIndex();
+                    cb.writeByte(0);
                     BgpMacIpAdvNlriVer4 macIpAdvNlri = (BgpMacIpAdvNlriVer4) element
                             .getRouteTypeSpec();
                     macIpAdvNlri.write(cb);
+                    cb.setByte(iSpecStartIndex, (short) (cb.writerIndex()
+                            - iSpecStartIndex + 1));
                     break;
                 case Constants.BGP_EVPN_ETHERNET_AUTO_DISCOVERY:
                     break;

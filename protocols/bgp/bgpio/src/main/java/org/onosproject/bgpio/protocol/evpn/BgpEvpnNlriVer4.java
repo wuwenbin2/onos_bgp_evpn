@@ -49,7 +49,6 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     // total length of route type and length
     public static final short TYPE_AND_LEN = 2;
     private byte routeType;
-    private byte length;
     private RouteTypeSpec routeTypeSpec;
 
     /**
@@ -57,7 +56,6 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
      */
     public BgpEvpnNlriVer4() {
         this.routeType = 2;
-        this.length = 0;
         this.routeTypeSpec = null;
 
     }
@@ -66,13 +64,10 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
      * Constructor to initialize parameters for BGP EvpnNlri.
      *
      * @param routeType route Type
-     * @param length length
      * @param routeTypeSpefic route type specific
      */
-    public BgpEvpnNlriVer4(byte routeType, byte length,
-                           RouteTypeSpec routeTypeSpefic) {
+    public BgpEvpnNlriVer4(byte routeType, RouteTypeSpec routeTypeSpefic) {
         this.routeType = routeType;
-        this.length = length;
         this.routeTypeSpec = routeTypeSpefic;
     }
 
@@ -106,7 +101,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
             default:
                 break;
             }
-            return new BgpEvpnNlriVer4(type, length, routeTypeSpefic);
+            return new BgpEvpnNlriVer4(type, routeTypeSpefic);
         } else {
             return new BgpEvpnNlriVer4();
         }
@@ -138,7 +133,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(getClass()).omitNullValues()
-                .add("routeType", routeType).add("length", length)
+                .add("routeType", routeType)
                 .add("routeTypeSpefic ", routeTypeSpec).toString();
     }
 
@@ -148,16 +143,14 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     }
 
     @Override
-    public byte getLength() {
-        return length;
-    }
-
-    @Override
     public int write(ChannelBuffer cb) {
         int iLenStartIndex = cb.writerIndex();
         cb.writeByte(routeType);
-        cb.writeByte(length);
+        int iSpecStartIndex = cb.writerIndex();
+        cb.writeByte(0);
         routeTypeSpec.write(cb);
+        cb.setByte(iSpecStartIndex,
+                   (short) (cb.writerIndex() - iSpecStartIndex + 1));
         return cb.writerIndex() - iLenStartIndex;
     }
 

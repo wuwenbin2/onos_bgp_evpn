@@ -28,33 +28,44 @@ import org.jboss.netty.handler.timeout.ReadTimeoutException;
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler;
 import org.onlab.packet.Ip4Address;
 import org.onlab.packet.IpAddress;
+import org.onlab.packet.MacAddress;
 import org.onosproject.bgp.controller.BgpCfg;
 import org.onosproject.bgp.controller.BgpController;
 import org.onosproject.bgp.controller.BgpId;
 import org.onosproject.bgp.controller.BgpPeer;
+import org.onosproject.bgp.controller.BgpPeer.OperationType;
 import org.onosproject.bgp.controller.BgpPeerCfg;
 import org.onosproject.bgp.controller.impl.BgpControllerImpl.BgpPeerManagerImpl;
 import org.onosproject.bgpio.exceptions.BgpParseException;
+import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.BgpFactory;
 import org.onosproject.bgpio.protocol.BgpMessage;
 import org.onosproject.bgpio.protocol.BgpOpenMsg;
 import org.onosproject.bgpio.protocol.BgpType;
 import org.onosproject.bgpio.protocol.BgpVersion;
+import org.onosproject.bgpio.protocol.evpn.BgpEvpnNlriVer4;
+import org.onosproject.bgpio.protocol.evpn.BgpMacIpAdvNlriVer4;
+import org.onosproject.bgpio.protocol.evpn.RouteType;
 import org.onosproject.bgpio.types.BgpErrorType;
+import org.onosproject.bgpio.types.BgpHeader;
 import org.onosproject.bgpio.types.BgpValueType;
+import org.onosproject.bgpio.types.EthernetSegmentidentifier;
 import org.onosproject.bgpio.types.FourOctetAsNumCapabilityTlv;
+import org.onosproject.bgpio.types.MplsLabel;
 import org.onosproject.bgpio.types.MultiProtocolExtnCapabilityTlv;
+import org.onosproject.bgpio.types.RouteDistinguisher;
 import org.onosproject.bgpio.types.RpdCapabilityTlv;
 import org.onosproject.bgpio.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -324,7 +335,9 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
             void processBgpMessage(BgpChannelHandler h, BgpMessage m) throws IOException, BgpParseException {
                 log.debug("Message received in established state " + m.getType());
                 // dispatch the message
+                log.info("===== dispatch message ===== ");
                 h.dispatchMessage(m);
+                h.sendUpdateMessage();
             }
         };
 
@@ -696,6 +709,55 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
                 .setEvpnCapabilityTlv(evpnCability).build();
         log.debug("Sending open message to {}", channel.getRemoteAddress());
         channel.write(Collections.singletonList(msg));
+
+    }
+
+    /**
+     * Send update message to the peer.
+     *
+     * @throws IOException, BgpParseException
+     */
+    private void sendUpdateMessage() throws IOException, BgpParseException {
+
+        BgpHeader bgpMsgHeader = new BgpHeader();
+        OperationType operationType = OperationType.ADD;
+        List<BgpEvpnNlri> eVpnComponents = new ArrayList<BgpEvpnNlri>();
+        BgpMacIpAdvNlriVer4 routeTypeSpec = new BgpMacIpAdvNlriVer4();
+        EthernetSegmentidentifier esi = new EthernetSegmentidentifier(new byte[10]);
+        byte[] rdBytes = new byte[8];
+        rdBytes[3] = 1;
+        rdBytes[7] = 1;
+        ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.put(rdBytes, 0, rdBytes.length);
+        buffer.flip();
+        RouteDistinguisher rd = new RouteDistinguisher(buffer.getLong());
+        MacAddress macAddress = MacAddress.valueOf("e4:68:a3:4e:dc:01");
+        byte[] addr = new byte[] {0x64, 0x01, 0x01, 0x01 };
+        InetAddress ipAddress = InetAddress.getByAddress(addr);
+        byte[] label1 = new byte[] {0x02, 0x71, 0x01 };
+        byte[] label2 = new byte[] {0x04, 0x02, 0x01 };
+        MplsLabel mplsLabel1 = new MplsLabel(label1);
+        MplsLabel mplsLabel2 = new MplsLabel(label2);
+
+        routeTypeSpec.setEthernetSegmentidentifier(esi);
+        routeTypeSpec.setEthernetTagID(0);
+        routeTypeSpec.setRouteDistinguisher(rd);
+        routeTypeSpec.setIpAddress(ipAddress);
+        routeTypeSpec.setMacAddress(macAddress);
+        routeTypeSpec.setMplsLable1(mplsLabel1);
+        routeTypeSpec.setMplsLable2(mplsLabel2);
+        BgpEvpnNlri nlri = new BgpEvpnNlriVer4(RouteType.MAC_IP_ADVERTISEMENT
+                .getType(), routeTypeSpec);
+        eVpnComponents.add(nlri);
+        Ip4Address nextHop = Ip4Address.valueOf("10.0.2.27");
+        BgpPeerImpl peer = (BgpPeerImpl) bgpPeer;
+        for (BgpValueType t : eVpnComponents) {
+
+            log.info("========evpn components is {}", t.toString());
+        }
+        peer.updateEvpn(operationType, eVpnComponents, nextHop);
+
+        log.info("Sending open message to {}", channel.getRemoteAddress());
 
     }
 

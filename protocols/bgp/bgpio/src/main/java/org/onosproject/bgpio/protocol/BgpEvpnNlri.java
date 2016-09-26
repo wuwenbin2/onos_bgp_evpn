@@ -41,12 +41,4 @@ public interface BgpEvpnNlri extends BgpValueType {
      */
     RouteTypeSpec getRouteTypeSpec();
 
-    /**
-     * Returns length.
-     *
-     * @return lengthin Nlri
-     * @throws BgpParseException while getting route type
-     */
-    byte getLength();
-
 }

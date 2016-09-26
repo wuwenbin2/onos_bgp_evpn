@@ -1,7 +1,5 @@
 package org.onosproject.bgpio.protocol.evpn;
 
-
-
 import java.net.InetAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onlab.packet.MacAddress;
@@ -47,8 +45,8 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
     protected static final Logger log = LoggerFactory.getLogger(BgpMacIpAdvNlriVer4.class);
     public static final short IPV4_ADDRESS_LENGTH = 4;
     public static final short MAC_ADDRESS_LENGTH = 6;
-    private RouteDistinguisher routeDistinguisher;
-    private EthernetSegmentidentifier ethernetSegmentidentifier;
+    private RouteDistinguisher rd;
+    private EthernetSegmentidentifier esi;
     private int ethernetTagID;
     private byte macAddressLength;
     private MacAddress macAddress;
@@ -61,8 +59,8 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
      * Resets parameters.
      */
     public BgpMacIpAdvNlriVer4() {
-        this.routeDistinguisher = null;
-        this.ethernetSegmentidentifier = null;
+        this.rd = null;
+        this.esi = null;
         this.ethernetTagID = 0;
         this.macAddressLength = MAC_ADDRESS_LENGTH;
         this.macAddress = null;
@@ -72,13 +70,13 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
         this.mplsLabel2 = null;
     }
 
-    public BgpMacIpAdvNlriVer4(RouteDistinguisher routeDistinguisher,
-                               EthernetSegmentidentifier ethernetSegmentidentifier,
+    public BgpMacIpAdvNlriVer4(RouteDistinguisher rd,
+                               EthernetSegmentidentifier esi,
                                int ethernetTagID, byte macAddressLength, MacAddress macAddress,
                                byte ipAddressLength, InetAddress ipAddress, MplsLabel mplsLabel1,
                                MplsLabel mplsLabel2) {
-        this.routeDistinguisher = routeDistinguisher;
-        this.ethernetSegmentidentifier = ethernetSegmentidentifier;
+        this.rd = rd;
+        this.esi = esi;
         this.ethernetTagID = ethernetTagID;
         this.macAddressLength = macAddressLength;
         this.macAddress = macAddress;
@@ -92,8 +90,8 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
         if (cb.readableBytes() == 0) {
             return null;
         }
-        RouteDistinguisher routeDistinguisher = RouteDistinguisher.read(cb);
-        EthernetSegmentidentifier ethernetSegmentidentifier = EthernetSegmentidentifier.read(cb);
+        RouteDistinguisher rd = RouteDistinguisher.read(cb);
+        EthernetSegmentidentifier esi = EthernetSegmentidentifier.read(cb);
         int ethernetTagID = cb.readInt();
         byte macAddressLength = cb.readByte();
         MacAddress macAddress = Validation.toMacAddress(MAC_ADDRESS_LENGTH, cb);
@@ -102,8 +100,8 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
         MplsLabel mplsLabel1 = MplsLabel.read(cb);
         MplsLabel mplsLabel2 = MplsLabel.read(cb);
 
-        return new BgpMacIpAdvNlriVer4(routeDistinguisher,
-                                       ethernetSegmentidentifier, ethernetTagID,
+        return new BgpMacIpAdvNlriVer4(rd,
+                                       esi, ethernetTagID,
                                        macAddressLength, macAddress,
                                        ipAddressLength, ipAddress, mplsLabel1,
                                        mplsLabel2);
@@ -112,8 +110,8 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
     @Override
     public int write(ChannelBuffer cb) {
         int iLenStartIndex = cb.writerIndex();
-        cb.writeLong(routeDistinguisher.getRouteDistinguisher());
-        ethernetSegmentidentifier.write(cb);
+        cb.writeLong(rd.getRouteDistinguisher());
+        esi.write(cb);
         cb.writeInt(ethernetTagID);
         cb.writeByte(macAddressLength);
         cb.writeBytes(macAddress.toBytes());
@@ -125,11 +123,11 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
     }
 
     public RouteDistinguisher getRouteDistinguisher() {
-        return routeDistinguisher;
+        return rd;
     }
 
     public EthernetSegmentidentifier getEthernetSegmentidentifier() {
-        return ethernetSegmentidentifier;
+        return esi;
     }
 
     public int getEthernetTagID() {
@@ -152,6 +150,34 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
         return mplsLabel2;
     }
 
+    public void setRouteDistinguisher(RouteDistinguisher rd) {
+        this.rd = rd;
+    }
+
+    public void setEthernetSegmentidentifier(EthernetSegmentidentifier esi) {
+        this.esi = esi;
+    }
+
+    public void setEthernetTagID(int ethernetTagID) {
+        this.ethernetTagID = ethernetTagID;
+    }
+
+    public void setMacAddress(MacAddress macAddress) {
+        this.macAddress = macAddress;
+    }
+
+    public void setIpAddress(InetAddress ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public void setMplsLable1(MplsLabel mplsLabel1) {
+        this.mplsLabel1 = mplsLabel1;
+    }
+
+    public void setMplsLable2(MplsLabel mplsLabel2) {
+        this.mplsLabel2 = mplsLabel2;
+    }
+
     @Override
     public RouteType getType() {
         return RouteType.MAC_IP_ADVERTISEMENT;
@@ -160,8 +186,8 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(getClass()).omitNullValues()
-                .add("routeDistinguisher ", routeDistinguisher)
-                .add("ethernetSegmentidentifier", ethernetSegmentidentifier)
+                .add("rd ", rd)
+                .add("esi", esi)
                 .add("ethernetTagID", ethernetTagID)
                 .add("macAddressLength", macAddressLength)
                 .add("macAddress ", macAddress)
