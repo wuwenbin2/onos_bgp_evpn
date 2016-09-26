@@ -28,6 +28,7 @@ import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.BgpLSNlri;
 import org.onosproject.bgpio.protocol.evpn.BgpEvpnNlriVer4;
 import org.onosproject.bgpio.protocol.evpn.BgpMacIpAdvNlriVer4;
+import org.onosproject.bgpio.protocol.evpn.RouteTypeSpec;
 import org.onosproject.bgpio.protocol.flowspec.BgpFlowSpecNlri;
 import org.onosproject.bgpio.protocol.linkstate.BgpNodeLSNlriVer4;
 import org.onosproject.bgpio.protocol.linkstate.BgpLinkLsNlriVer4;
@@ -87,7 +88,7 @@ public class MpReachNlri implements BgpValueType {
 
     public MpReachNlri(List<BgpEvpnNlri> evpnNlri, short afi, byte safi, Ip4Address ipNextHop) {
         this.bgpLSNlri = null;
-        this.length = 0;
+        this.length = 42;
         this.ipNextHop = ipNextHop;
         this.isMpReachNlri = true;
         this.evpnNlri = evpnNlri;
@@ -343,6 +344,8 @@ public class MpReachNlri implements BgpValueType {
             } else if ((afi == Constants.AFI_EVPN_VALUE)
                     && (safi == Constants.SAFI_EVPN_VALUE)) {
 
+                log.info("=====evpn nlri is being read with afi {} and saif {}", afi, safi);
+
                 List<BgpEvpnNlri> eVpnComponents = new LinkedList<>();
 
                 byte nextHopLen = tempCb.readByte();
@@ -354,13 +357,33 @@ public class MpReachNlri implements BgpValueType {
                 ipNextHop = Ip4Address.valueOf(ipAddress);
                 byte reserved = tempCb.readByte();
 
+                log.info("=====Reading ");
                 while (tempCb.readableBytes() > 0) {
-                    BgpEvpnNlri eVpnComponent = BgpEvpnNlriVer4.read(tempCb);
-                    eVpnComponents.add(eVpnComponent);
+                    byte routeType = tempCb.readByte();
+                    byte length = tempCb.readByte();
+                    RouteTypeSpec nlri = null;
+                    if (tempCb.readableBytes() >= length) {
+                        switch (routeType) {
+                        case Constants.BGP_EVPN_MAC_IP_ADVERTISEMENT:
+                            nlri = BgpMacIpAdvNlriVer4.read(tempCb);
+                            break;
+                        case Constants.BGP_EVPN_ETHERNET_AUTO_DISCOVERY:
+                            break;
+                        case Constants.BGP_EVPN_INCLUSIVE_MULTICASE_ETHERNET:
+                            break;
+                        case Constants.BGP_EVPN_ETHERNET_SEGMENT:
+                            break;
+                        default:
+                            break;
+                        }
+                        BgpEvpnNlri eVpnComponent = new BgpEvpnNlriVer4(routeType,
+                                                                        nlri);
+                        eVpnComponents.add(eVpnComponent);
+                        log.info("=====evpnComponent is {} ======",
+                                 eVpnComponent);
+                    }
                 }
 
-                log.info("=======Receive evpn message======= components are {}, next hop is {}",
-                         eVpnComponents.toString(), ipNextHop);
                 return new MpReachNlri(eVpnComponents, afi, safi, ipNextHop);
             } else {
                 throw new BgpParseException("Not Supporting afi " + afi
@@ -459,6 +482,7 @@ public class MpReachNlri implements BgpValueType {
             cb.writeShort(0);
             cb.writeShort(afi);
             cb.writeByte(safi);
+            cb.writeByte(0x04);
             cb.writeInt(ipNextHop.toInt());
             //sub network points of attachment
             cb.writeByte(0);

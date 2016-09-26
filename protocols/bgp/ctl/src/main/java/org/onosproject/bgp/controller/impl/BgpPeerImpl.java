@@ -287,9 +287,6 @@ public class BgpPeerImpl implements BgpPeer {
     private void sendEvpnUpdateMessageToPeer(OperationType operType,
                                              List<BgpEvpnNlri> eVpnComponents,
                                              Ip4Address nextHop) {
-        for (BgpValueType t : eVpnComponents) {
-            log.info("========evpn components is {}", t.toString());
-        }
         List<BgpValueType> attributesList = new LinkedList<>();
         byte sessionType = sessionInfo.isIbgpSession() ? (byte) 0 : (byte) 1;
         short afi = Constants.AFI_EVPN_VALUE;

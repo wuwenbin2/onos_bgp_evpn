@@ -144,6 +144,11 @@ public class Validation {
     public static InetAddress toInetAddress(int length, ChannelBuffer cb) {
         byte[] address = new byte[length];
         cb.readBytes(address, 0, length);
+        String temp = "";
+        for (byte add : address) {
+            temp += add;
+        }
+        log.info("======address is ======{}", temp);
         InetAddress ipAddress = null;
         try {
             ipAddress = InetAddress.getByAddress(address);
