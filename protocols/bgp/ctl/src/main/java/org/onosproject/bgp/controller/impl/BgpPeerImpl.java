@@ -275,18 +275,19 @@ public class BgpPeerImpl implements BgpPeer {
     }
 
     @Override
-    public void updateEvpn(OperationType operType,
-                           List<BgpEvpnNlri> eVpnComponents,
-                           Ip4Address nextHop) {
+    public void updateEvpn(OperationType operType, Ip4Address nextHop,
+                           List<BgpValueType> extCommunit,
+                           List<BgpEvpnNlri> eVpnComponents) {
         Preconditions.checkNotNull(operType, "Operation type cannot be null");
         Preconditions.checkNotNull(eVpnComponents, "Evpn nlri cannot be null");
         Preconditions.checkNotNull(nextHop, "Next hop cannot be null");
-        sendEvpnUpdateMessageToPeer(operType, eVpnComponents, nextHop);
+        sendEvpnUpdateMessageToPeer(operType, nextHop, extCommunit, eVpnComponents);
     }
 
     private void sendEvpnUpdateMessageToPeer(OperationType operType,
-                                             List<BgpEvpnNlri> eVpnComponents,
-                                             Ip4Address nextHop) {
+                                             Ip4Address nextHop,
+                                             List<BgpValueType> extCommunit,
+                                             List<BgpEvpnNlri> eVpnComponents) {
         List<BgpValueType> attributesList = new LinkedList<>();
         byte sessionType = sessionInfo.isIbgpSession() ? (byte) 0 : (byte) 1;
         short afi = Constants.AFI_EVPN_VALUE;
@@ -318,13 +319,11 @@ public class BgpPeerImpl implements BgpPeer {
                 As4Path as4Path = new As4Path(aspathSet, aspathSeq);
                 attributesList.add(as4Path);
             }
-            attributesList.add(new Med(0));
         } else {
             attributesList.add(new AsPath());
-            attributesList.add(new Med(0));
-            attributesList.add(new LocalPref(100));
         }
 
+        attributesList.add(new BgpExtendedCommunity(extCommunit));
         if (operType == OperationType.ADD) {
             attributesList
                     .add(new MpReachNlri(eVpnComponents, afi, safi, nextHop));
@@ -335,9 +334,6 @@ public class BgpPeerImpl implements BgpPeer {
         BgpMessage msg = Controller.getBgpMessageFactory4()
                 .updateMessageBuilder().setBgpPathAttributes(attributesList)
                 .build();
-        log.info("======sending msg {}", msg.toString());
-        log.info("Sending evpn Update message to {}",
-                 channel.getRemoteAddress());
         channel.write(Collections.singletonList(msg));
     }
 

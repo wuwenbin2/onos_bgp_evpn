@@ -20,7 +20,6 @@ import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onlab.packet.Ip4Address;
 import org.onosproject.bgpio.exceptions.BgpParseException;
@@ -28,7 +27,6 @@ import org.onosproject.bgpio.protocol.BgpEvpnNlri;
 import org.onosproject.bgpio.protocol.BgpLSNlri;
 import org.onosproject.bgpio.protocol.evpn.BgpEvpnNlriVer4;
 import org.onosproject.bgpio.protocol.evpn.BgpMacIpAdvNlriVer4;
-import org.onosproject.bgpio.protocol.evpn.RouteTypeSpec;
 import org.onosproject.bgpio.protocol.flowspec.BgpFlowSpecNlri;
 import org.onosproject.bgpio.protocol.linkstate.BgpNodeLSNlriVer4;
 import org.onosproject.bgpio.protocol.linkstate.BgpLinkLsNlriVer4;
@@ -357,31 +355,12 @@ public class MpReachNlri implements BgpValueType {
                 ipNextHop = Ip4Address.valueOf(ipAddress);
                 byte reserved = tempCb.readByte();
 
-                log.info("=====Reading ");
+                log.info("=====Reading NLRI======");
                 while (tempCb.readableBytes() > 0) {
-                    byte routeType = tempCb.readByte();
-                    byte length = tempCb.readByte();
-                    RouteTypeSpec nlri = null;
-                    if (tempCb.readableBytes() >= length) {
-                        switch (routeType) {
-                        case Constants.BGP_EVPN_MAC_IP_ADVERTISEMENT:
-                            nlri = BgpMacIpAdvNlriVer4.read(tempCb);
-                            break;
-                        case Constants.BGP_EVPN_ETHERNET_AUTO_DISCOVERY:
-                            break;
-                        case Constants.BGP_EVPN_INCLUSIVE_MULTICASE_ETHERNET:
-                            break;
-                        case Constants.BGP_EVPN_ETHERNET_SEGMENT:
-                            break;
-                        default:
-                            break;
-                        }
-                        BgpEvpnNlri eVpnComponent = new BgpEvpnNlriVer4(routeType,
-                                                                        nlri);
-                        eVpnComponents.add(eVpnComponent);
-                        log.info("=====evpnComponent is {} ======",
-                                 eVpnComponent);
-                    }
+
+                    BgpEvpnNlri eVpnComponent = BgpEvpnNlriVer4.read(tempCb);
+                    eVpnComponents.add(eVpnComponent);
+                    log.info("=====evpn Component is {} ======", eVpnComponent);
                 }
 
                 return new MpReachNlri(eVpnComponents, afi, safi, ipNextHop);
@@ -482,6 +461,7 @@ public class MpReachNlri implements BgpValueType {
             cb.writeShort(0);
             cb.writeShort(afi);
             cb.writeByte(safi);
+            // ip address length
             cb.writeByte(0x04);
             cb.writeInt(ipNextHop.toInt());
             //sub network points of attachment
@@ -497,8 +477,9 @@ public class MpReachNlri implements BgpValueType {
                     BgpMacIpAdvNlriVer4 macIpAdvNlri = (BgpMacIpAdvNlriVer4) element
                             .getRouteTypeSpec();
                     macIpAdvNlri.write(cb);
-                    cb.setByte(iSpecStartIndex, (short) (cb.writerIndex()
-                            - iSpecStartIndex + 1));
+                    cb.setByte(iSpecStartIndex, (byte) (cb.writerIndex()
+                            - iSpecStartIndex - 1));
+                    ChannelBuffer  temcb = cb.copy();
                     break;
                 case Constants.BGP_EVPN_ETHERNET_AUTO_DISCOVERY:
                     break;
@@ -510,7 +491,6 @@ public class MpReachNlri implements BgpValueType {
                     break;
                 }
             }
-
             int evpnNlriLen = cb.writerIndex() - mpReachDataIndx;
             cb.setShort(mpReachDataIndx, (short) (evpnNlriLen - 2));
         }
@@ -535,4 +515,6 @@ public class MpReachNlri implements BgpValueType {
         // TODO Auto-generated method stub
         return 0;
     }
+
 }
+

@@ -136,7 +136,7 @@ public class BgpEncap implements BgpValueType {
         int iLenStartIndex = cb.writerIndex();
         cb.writeShort(TYPE);
         cb.writeInt(spec);
-        cb.writeByte(tunnelType);
+        cb.writeShort(tunnelType);
         return cb.writerIndex() - iLenStartIndex;
     }
 

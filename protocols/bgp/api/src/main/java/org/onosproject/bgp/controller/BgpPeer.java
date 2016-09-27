@@ -151,9 +151,11 @@ public interface BgpPeer {
      * Updates evpn rule.
      *
      * @param operType operation type add or delete or update
-     * @param eVpnComponents list of evpnNlri
      * @param nextHop next Hop
+     * @param extCommunit extended community
+     * @param eVpnComponents list of evpnNlri
      */
-    void updateEvpn(OperationType operType, List<BgpEvpnNlri> eVpnComponents,
-                    Ip4Address nextHop);
+    void updateEvpn(OperationType operType, Ip4Address nextHop,
+                    List<BgpValueType> extCommunit,
+                    List<BgpEvpnNlri> eVpnComponents);
 }

@@ -168,6 +168,9 @@ public class BgpExtendedCommunity implements BgpValueType {
                     || fsTlv.getType() == Constants.BGP_ROUTE_TARGET_LARGEAS) {
                 RouteTarget routeTarget = (RouteTarget) fsTlv;
                 routeTarget.write(cb);
+            } else if (fsTlv.getType() == Constants.BGP_ENCAP) {
+                BgpEncap bgpEncap = (BgpEncap) fsTlv;
+                bgpEncap.write(cb);
             } else if (fsTlv.getType() == Constants.BGP_FLOWSPEC_ACTION_TRAFFIC_ACTION) {
                 BgpFsActionTrafficAction trafficAction = (BgpFsActionTrafficAction) fsTlv;
                 trafficAction.write(cb);

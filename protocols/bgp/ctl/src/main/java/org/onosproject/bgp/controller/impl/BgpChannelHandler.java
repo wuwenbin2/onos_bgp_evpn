@@ -46,6 +46,7 @@ import org.onosproject.bgpio.protocol.BgpVersion;
 import org.onosproject.bgpio.protocol.evpn.BgpEvpnNlriVer4;
 import org.onosproject.bgpio.protocol.evpn.BgpMacIpAdvNlriVer4;
 import org.onosproject.bgpio.protocol.evpn.RouteType;
+import org.onosproject.bgpio.types.BgpEncap;
 import org.onosproject.bgpio.types.BgpErrorType;
 import org.onosproject.bgpio.types.BgpHeader;
 import org.onosproject.bgpio.types.BgpValueType;
@@ -54,6 +55,7 @@ import org.onosproject.bgpio.types.FourOctetAsNumCapabilityTlv;
 import org.onosproject.bgpio.types.MplsLabel;
 import org.onosproject.bgpio.types.MultiProtocolExtnCapabilityTlv;
 import org.onosproject.bgpio.types.RouteDistinguisher;
+import org.onosproject.bgpio.types.RouteTarget;
 import org.onosproject.bgpio.types.RpdCapabilityTlv;
 import org.onosproject.bgpio.util.Constants;
 import org.slf4j.Logger;
@@ -735,7 +737,7 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
         byte[] addr = new byte[] {0x64, 0x01, 0x01, 0x01 };
         InetAddress ipAddress = InetAddress.getByAddress(addr);
         byte[] label1 = new byte[] {0x02, 0x71, 0x01 };
-        byte[] label2 = new byte[] {0x04, 0x02, 0x01 };
+        byte[] label2 = new byte[] {0x04, (byte) 0xe2, 0x01 };
         MplsLabel mplsLabel1 = new MplsLabel(label1);
         MplsLabel mplsLabel2 = new MplsLabel(label2);
 
@@ -750,12 +752,18 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
                 .getType(), routeTypeSpec);
         eVpnComponents.add(nlri);
         Ip4Address nextHop = Ip4Address.valueOf("10.0.2.27");
-        BgpPeerImpl peer = (BgpPeerImpl) bgpPeer;
-        for (BgpValueType t : eVpnComponents) {
 
-            log.info("========evpn components is {}", t.toString());
-        }
-        peer.updateEvpn(operationType, eVpnComponents, nextHop);
+        List<BgpValueType> extCom = new ArrayList<BgpValueType>();
+        short rtType = 0x02;
+        byte[] rtBytes = new byte[6];
+        rtBytes[1] = 1;
+        rtBytes[5] = 1;
+        RouteTarget rTarget = new RouteTarget(rtType, rtBytes);
+        extCom.add(rTarget);
+        BgpEncap enc = new BgpEncap(0, (short) 0x08);
+        extCom.add(enc);
+        BgpPeerImpl peer = (BgpPeerImpl) bgpPeer;
+        peer.updateEvpn(operationType, nextHop, extCom, eVpnComponents);
 
         log.info("Sending open message to {}", channel.getRemoteAddress());
 

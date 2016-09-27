@@ -43,8 +43,9 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
 
     public static final short TYPE = 2;
     protected static final Logger log = LoggerFactory.getLogger(BgpMacIpAdvNlriVer4.class);
-    public static final short IPV4_ADDRESS_LENGTH = 4;
-    public static final short MAC_ADDRESS_LENGTH = 6;
+    // unit of length is bit
+    public static final short IPV4_ADDRESS_LENGTH = 32;
+    public static final short MAC_ADDRESS_LENGTH = 48;
     private RouteDistinguisher rd;
     private EthernetSegmentidentifier esi;
     private int ethernetTagID;
@@ -94,9 +95,9 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
         EthernetSegmentidentifier esi = EthernetSegmentidentifier.read(cb);
         int ethernetTagID = cb.readInt();
         byte macAddressLength = cb.readByte();
-        MacAddress macAddress = Validation.toMacAddress(MAC_ADDRESS_LENGTH, cb);
+        MacAddress macAddress = Validation.toMacAddress(MAC_ADDRESS_LENGTH / 8, cb);
         byte ipAddressLength = cb.readByte();
-        InetAddress ipAddress = Validation.toInetAddress(IPV4_ADDRESS_LENGTH, cb);
+        InetAddress ipAddress = Validation.toInetAddress(IPV4_ADDRESS_LENGTH / 8, cb);
         MplsLabel mplsLabel1 = MplsLabel.read(cb);
         MplsLabel mplsLabel2 = MplsLabel.read(cb);
 

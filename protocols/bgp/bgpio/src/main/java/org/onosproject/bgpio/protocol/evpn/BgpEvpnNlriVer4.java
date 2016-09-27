@@ -87,6 +87,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
             ChannelBuffer tempBuf = cb.copy();
             byte type = cb.readByte();
             byte length = cb.readByte();
+            log.info("=====evpn nlri type is {}", type);
             if (cb.readableBytes() < length) {
                 throw new BgpParseException(BgpErrorType.UPDATE_MESSAGE_ERROR,
                                             BgpErrorType.OPTIONAL_ATTRIBUTE_ERROR,
@@ -101,6 +102,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
             default:
                 break;
             }
+            log.info("=====evpn nlri routeTypeSpefic is {}", routeTypeSpefic.toString());
             return new BgpEvpnNlriVer4(type, routeTypeSpefic);
         } else {
             return new BgpEvpnNlriVer4();
@@ -148,7 +150,13 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
         cb.writeByte(routeType);
         int iSpecStartIndex = cb.writerIndex();
         cb.writeByte(0);
-        routeTypeSpec.write(cb);
+        switch (routeType) {
+        case BgpMacIpAdvNlriVer4.TYPE:
+            ((BgpMacIpAdvNlriVer4) routeTypeSpec).write(cb);
+            break;
+        default:
+            break;
+        }
         cb.setByte(iSpecStartIndex,
                    (short) (cb.writerIndex() - iSpecStartIndex + 1));
         return cb.writerIndex() - iLenStartIndex;
