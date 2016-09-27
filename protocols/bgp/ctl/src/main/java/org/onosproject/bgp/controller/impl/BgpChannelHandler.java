@@ -339,7 +339,7 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
                 // dispatch the message
                 log.info("===== dispatch message ===== ");
                 h.dispatchMessage(m);
-                h.sendUpdateMessage();
+//                h.sendUpdateMessage();
             }
         };
 
