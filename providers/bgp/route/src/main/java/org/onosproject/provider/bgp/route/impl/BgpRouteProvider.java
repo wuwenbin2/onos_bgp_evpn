@@ -16,6 +16,7 @@ package org.onosproject.provider.bgp.route.impl;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -25,19 +26,29 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.onlab.packet.Ip4Address;
 import org.onlab.packet.MacAddress;
 import org.onosproject.bgp.controller.BgpController;
+import org.onosproject.bgp.controller.BgpId;
 import org.onosproject.bgp.controller.BgpPeer.OperationType;
+import org.onosproject.bgp.controller.BgpRouteListener;
 import org.onosproject.bgpio.exceptions.BgpParseException;
 import org.onosproject.bgpio.protocol.BgpEvpnNlri;
+import org.onosproject.bgpio.protocol.BgpUpdateMsg;
 import org.onosproject.bgpio.protocol.evpn.BgpEvpnNlriVer4;
 import org.onosproject.bgpio.protocol.evpn.BgpMacIpAdvNlriVer4;
 import org.onosproject.bgpio.protocol.evpn.RouteType;
 import org.onosproject.bgpio.types.BgpEncap;
+import org.onosproject.bgpio.types.BgpExtendedCommunity;
 import org.onosproject.bgpio.types.BgpValueType;
 import org.onosproject.bgpio.types.EthernetSegmentidentifier;
+import org.onosproject.bgpio.types.MpReachNlri;
+import org.onosproject.bgpio.types.MpUnReachNlri;
 import org.onosproject.bgpio.types.MplsLabel;
+import org.onosproject.bgpio.types.NlriDetailsType;
 import org.onosproject.bgpio.types.RouteDistinguisher;
 import org.onosproject.bgpio.types.RouteTarget;
 import org.onosproject.core.CoreService;
+import org.onosproject.incubator.net.routing.ResolvedRoute;
+import org.onosproject.incubator.net.routing.RouteEvent;
+import org.onosproject.incubator.net.routing.RouteListener;
 import org.onosproject.incubator.net.routing.RouteService;
 import org.onosproject.mastership.MastershipService;
 import org.onosproject.net.provider.AbstractProvider;
@@ -56,7 +67,8 @@ public class BgpRouteProvider extends AbstractProvider {
      * Creates an instance of BGP route provider.
      */
     public BgpRouteProvider() {
-        super(new ProviderId("route", "org.onosproject.provider.bgp"));
+        super(new ProviderId("route",
+                             "org.onosproject.provider.bgp.route.impl"));
     }
 
     private static final Logger log = LoggerFactory
@@ -74,15 +86,24 @@ public class BgpRouteProvider extends AbstractProvider {
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     protected MastershipService mastershipService;
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    protected RouteService routeService;
+
+    private final InternalRouteListener routeListener = new InternalRouteListener();
+    private final InternalBgpRouteListener bgpRouteListener = new InternalBgpRouteListener();
+
     @Activate
     public void activate() {
-        log.debug("BgpTopologyProvider activate");
+        routeService.addListener(routeListener);
+        controller.addRouteListener(bgpRouteListener);
+        log.info("BgpTopologyProvider activate");
     }
 
     @Deactivate
     public void deactivate() {
-        log.debug("BgpTopologyProvider deactivate");
-
+        routeService.removeListener(routeListener);
+        controller.removeRouteListener(bgpRouteListener);
+        log.info("BgpTopologyProvider deactivate");
     }
 
     private void sendUpdateMessage(OperationType operationType, String rdString,
@@ -157,10 +178,6 @@ public class BgpRouteProvider extends AbstractProvider {
                                         (byte) ((assignednum >> 16) & 0xFF),
                                         (byte) ((assignednum >> 8) & 0xFF),
                                         (byte) (assignednum & 0xFF) };
-                // for (byte b : rt) {
-                // System.out.println(b);
-                // }
-
                 short type = 0x02;
                 return new RouteTarget(type, rt);
             }
@@ -193,4 +210,81 @@ public class BgpRouteProvider extends AbstractProvider {
 
     }
 
+    private class InternalRouteListener implements RouteListener {
+        @Override
+        public void event(RouteEvent event) {
+            switch (event.type()) {
+            case ROUTE_ADDED:
+            case ROUTE_UPDATED:
+                update(event.subject());
+                break;
+            case ROUTE_REMOVED:
+                withdraw(event.subject());
+                break;
+            default:
+                break;
+            }
+        }
+
+    }
+
+    public void update(ResolvedRoute subject) {
+        // send update route to peers.
+    }
+
+    public void withdraw(ResolvedRoute subject) {
+       // send delete route to peers.
+    }
+
+    private class InternalBgpRouteListener implements BgpRouteListener {
+
+        @Override
+        public void addRoute(BgpId bgpId, BgpUpdateMsg updateMsg) {
+            List<BgpValueType> pathAttr = updateMsg.bgpPathAttributes()
+                    .pathAttributes();
+            Iterator<BgpValueType> iterator = pathAttr.iterator();
+            RouteTarget rt = null;
+            List<BgpEvpnNlri> evpnReachNlri = null;
+            List<BgpEvpnNlri> evpnUnreachNlri = null;
+            while (iterator.hasNext()) {
+                BgpValueType attr = iterator.next();
+                if (attr instanceof MpReachNlri) {
+                    MpReachNlri mpReachNlri = (MpReachNlri) attr;
+                    if (mpReachNlri
+                            .getNlriDetailsType() == NlriDetailsType.EVPN) {
+                        evpnReachNlri = mpReachNlri.bgpEvpnNlri();
+                    }
+
+                }
+                if (attr instanceof MpUnReachNlri) {
+                    MpReachNlri mpUnReachNlri = (MpReachNlri) attr;
+                    if (mpUnReachNlri
+                            .getNlriDetailsType() == NlriDetailsType.EVPN) {
+                        evpnUnreachNlri = mpUnReachNlri.bgpEvpnNlri();
+                    }
+                }
+
+                if (attr instanceof BgpExtendedCommunity) {
+                    BgpExtendedCommunity extCom = (BgpExtendedCommunity) attr;
+                    Iterator<BgpValueType> extIte = pathAttr.iterator();
+                    while (extIte.hasNext()) {
+                        BgpValueType extAttr = extIte.next();
+                        if (extAttr instanceof RouteTarget) {
+                            rt = (RouteTarget) extAttr;
+                            break;
+                        }
+                    }
+
+                }
+            }
+
+            if ((rt != null) && (evpnReachNlri != null)) {
+                // add route to route system
+            }
+            if ((rt != null) && (evpnUnreachNlri != null)) {
+                // delete route from route system
+            }
+        }
+
+    }
 }
