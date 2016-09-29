@@ -31,7 +31,7 @@ public interface BgpEvpnNlri extends BgpValueType {
      * @return route type in Nlri
      * @throws BgpParseException while getting route type
      */
-    RouteType getRouteType() throws BgpParseException;
+    RouteType getRouteType();
 
     /**
      * Returns route type specific Nlri.

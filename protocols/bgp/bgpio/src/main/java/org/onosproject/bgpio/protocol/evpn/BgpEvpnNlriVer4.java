@@ -116,7 +116,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
     }
 
     @Override
-    public RouteType getRouteType() throws BgpParseException {
+    public RouteType getRouteType() {
         switch (routeType) {
         case Constants.BGP_EVPN_ETHERNET_AUTO_DISCOVERY:
             return RouteType.ETHERNET_AUTO_DISCOVERY;
@@ -127,8 +127,7 @@ public class BgpEvpnNlriVer4 implements BgpEvpnNlri {
         case Constants.BGP_EVPN_ETHERNET_SEGMENT:
             return RouteType.ETHERNET_SEGMENT;
         default:
-            throw new BgpParseException(BgpErrorType.UPDATE_MESSAGE_ERROR,
-                                        (byte) 0, null);
+            return null;
         }
     }
 
