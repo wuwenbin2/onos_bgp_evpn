@@ -121,7 +121,7 @@ public class AsPath implements BgpValueType {
             byte pathSegType = tempBuf.readByte();
             //no of ASes
             byte pathSegLen = tempBuf.readByte();
-            int length = pathSegLen * LARGE_ASNUM_SIZE;
+            int length = pathSegLen * ASNUM_SIZE;
             if (tempBuf.readableBytes() < length) {
                 Validation.validateLen(BgpErrorType.UPDATE_MESSAGE_ERROR,
                         BgpErrorType.ATTRIBUTE_LENGTH_ERROR, length);
