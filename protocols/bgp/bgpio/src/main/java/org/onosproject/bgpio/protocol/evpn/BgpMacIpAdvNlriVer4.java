@@ -63,9 +63,9 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
         this.rd = null;
         this.esi = null;
         this.ethernetTagID = 0;
-        this.macAddressLength = MAC_ADDRESS_LENGTH;
+        this.macAddressLength = 0;
         this.macAddress = null;
-        this.ipAddressLength = IPV4_ADDRESS_LENGTH;
+        this.ipAddressLength = 0;
         this.ipAddress = null;
         this.mplsLabel1 = null;
         this.mplsLabel2 = null;
@@ -73,13 +73,13 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
 
     public BgpMacIpAdvNlriVer4(RouteDistinguisher rd,
                                EthernetSegmentidentifier esi,
-                               int ethernetTagID, byte macAddressLength, MacAddress macAddress,
-                               byte ipAddressLength, InetAddress ipAddress, MplsLabel mplsLabel1,
+                               int ethernetTagID, MacAddress macAddress, byte ipAddressLength,
+                               InetAddress ipAddress, MplsLabel mplsLabel1,
                                MplsLabel mplsLabel2) {
         this.rd = rd;
         this.esi = esi;
         this.ethernetTagID = ethernetTagID;
-        this.macAddressLength = macAddressLength;
+        this.macAddressLength = MAC_ADDRESS_LENGTH;
         this.macAddress = macAddress;
         this.ipAddressLength = ipAddressLength;
         this.ipAddress = ipAddress;
@@ -95,15 +95,19 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
         EthernetSegmentidentifier esi = EthernetSegmentidentifier.read(cb);
         int ethernetTagID = cb.readInt();
         byte macAddressLength = cb.readByte();
-        MacAddress macAddress = Validation.toMacAddress(MAC_ADDRESS_LENGTH / 8, cb);
+        MacAddress macAddress = Validation.toMacAddress(macAddressLength / 8, cb);
         byte ipAddressLength = cb.readByte();
-        InetAddress ipAddress = Validation.toInetAddress(IPV4_ADDRESS_LENGTH / 8, cb);
+        InetAddress ipAddress = null;
+        if (ipAddressLength > 0) {
+            ipAddress = Validation.toInetAddress(ipAddressLength / 8, cb);
+        }
         MplsLabel mplsLabel1 = MplsLabel.read(cb);
-        MplsLabel mplsLabel2 = MplsLabel.read(cb);
+        MplsLabel mplsLabel2 = null;
+        if (cb.readableBytes() > 0) {
+            mplsLabel2 = MplsLabel.read(cb);
+        }
 
-        return new BgpMacIpAdvNlriVer4(rd,
-                                       esi, ethernetTagID,
-                                       macAddressLength, macAddress,
+        return new BgpMacIpAdvNlriVer4(rd, esi, ethernetTagID, macAddress,
                                        ipAddressLength, ipAddress, mplsLabel1,
                                        mplsLabel2);
     }
@@ -117,9 +121,13 @@ public class BgpMacIpAdvNlriVer4 implements RouteTypeSpec {
         cb.writeByte(macAddressLength);
         cb.writeBytes(macAddress.toBytes());
         cb.writeByte(ipAddressLength);
-        cb.writeBytes(ipAddress.getAddress());
+        if (ipAddressLength > 0) {
+            cb.writeBytes(ipAddress.getAddress());
+        }
         mplsLabel1.write(cb);
-        mplsLabel2.write(cb);
+        if (mplsLabel2 != null) {
+            mplsLabel2.write(cb);
+        }
         return cb.writerIndex() - iLenStartIndex;
     }
 

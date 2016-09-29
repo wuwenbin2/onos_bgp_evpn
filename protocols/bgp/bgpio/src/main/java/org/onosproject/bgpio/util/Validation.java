@@ -19,7 +19,6 @@ package org.onosproject.bgpio.util;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.onlab.packet.IpAddress;
@@ -144,16 +143,11 @@ public class Validation {
     public static InetAddress toInetAddress(int length, ChannelBuffer cb) {
         byte[] address = new byte[length];
         cb.readBytes(address, 0, length);
-        String temp = "";
-        for (byte add : address) {
-            temp += add;
-        }
-        log.info("======address is ======{}", temp);
         InetAddress ipAddress = null;
         try {
             ipAddress = InetAddress.getByAddress(address);
         } catch (UnknownHostException e) {
-             log.info("InetAddress convertion failed");
+            log.info("InetAddress convertion failed");
         }
         return ipAddress;
     }
@@ -240,4 +234,5 @@ public class Validation {
         IpPrefix ipPrefix = IpPrefix.valueOf(IpAddress.Version.INET, value, length);
         return ipPrefix;
     }
+
 }

@@ -150,24 +150,4 @@ public interface BgpController {
      */
     Set<BgpLinkListener> linkListener();
 
-    /**
-     * Register a listener for BGP message events.
-     *
-     * @param listener the listener to notify
-     */
-    void addRouteListener(BgpRouteListener listener);
-
-    /**
-     * Unregister a listener.
-     *
-     * @param listener the listener to unregister
-     */
-    void removeRouteListener(BgpRouteListener listener);
-
-    /**
-     * Return BGP route listener.
-     *
-     * @return route listener
-     */
-    Set<BgpRouteListener> routeListener();
 }
