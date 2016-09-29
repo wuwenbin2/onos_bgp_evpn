@@ -48,7 +48,6 @@ import org.onosproject.bgpio.protocol.evpn.BgpMacIpAdvNlriVer4;
 import org.onosproject.bgpio.protocol.evpn.RouteType;
 import org.onosproject.bgpio.types.BgpEncap;
 import org.onosproject.bgpio.types.BgpErrorType;
-import org.onosproject.bgpio.types.BgpHeader;
 import org.onosproject.bgpio.types.BgpValueType;
 import org.onosproject.bgpio.types.EthernetSegmentidentifier;
 import org.onosproject.bgpio.types.FourOctetAsNumCapabilityTlv;
@@ -337,9 +336,8 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
             void processBgpMessage(BgpChannelHandler h, BgpMessage m) throws IOException, BgpParseException {
                 log.debug("Message received in established state " + m.getType());
                 // dispatch the message
-                log.info("===== dispatch message ===== ");
                 h.dispatchMessage(m);
-//                h.sendUpdateMessage();
+                h.sendUpdateMessage();
             }
         };
 
@@ -721,11 +719,10 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
      */
     private void sendUpdateMessage() throws IOException, BgpParseException {
 
-        BgpHeader bgpMsgHeader = new BgpHeader();
         OperationType operationType = OperationType.ADD;
         List<BgpEvpnNlri> eVpnComponents = new ArrayList<BgpEvpnNlri>();
-        BgpMacIpAdvNlriVer4 routeTypeSpec = new BgpMacIpAdvNlriVer4();
         EthernetSegmentidentifier esi = new EthernetSegmentidentifier(new byte[10]);
+        int ethernetTagID = 0;
         byte[] rdBytes = new byte[8];
         rdBytes[3] = 1;
         rdBytes[7] = 1;
@@ -734,20 +731,24 @@ class BgpChannelHandler extends IdleStateAwareChannelHandler {
         buffer.flip();
         RouteDistinguisher rd = new RouteDistinguisher(buffer.getLong());
         MacAddress macAddress = MacAddress.valueOf("e4:68:a3:4e:dc:01");
-        byte[] addr = new byte[] {0x64, 0x01, 0x01, 0x01 };
-        InetAddress ipAddress = InetAddress.getByAddress(addr);
+        // byte ipAddressLength = 32;
+        // byte[] addr = new byte[] {0x64, 0x01, 0x01, 0x01 };
+        // InetAddress ipAddress = InetAddress.getByAddress(addr);
+        byte ipAddressLength = 0;
+        InetAddress ipAddress = null;
         byte[] label1 = new byte[] {0x02, 0x71, 0x01 };
-        byte[] label2 = new byte[] {0x04, (byte) 0xe2, 0x01 };
         MplsLabel mplsLabel1 = new MplsLabel(label1);
-        MplsLabel mplsLabel2 = new MplsLabel(label2);
+        // byte[] label2 = new byte[] {0x04, (byte) 0xe2, 0x01 };
+        // MplsLabel mplsLabel2 = new MplsLabel(label2);
+        MplsLabel mplsLabel2 = null;
 
-        routeTypeSpec.setEthernetSegmentidentifier(esi);
-        routeTypeSpec.setEthernetTagID(0);
-        routeTypeSpec.setRouteDistinguisher(rd);
-        routeTypeSpec.setIpAddress(ipAddress);
-        routeTypeSpec.setMacAddress(macAddress);
-        routeTypeSpec.setMplsLable1(mplsLabel1);
-        routeTypeSpec.setMplsLable2(mplsLabel2);
+        BgpMacIpAdvNlriVer4 routeTypeSpec = new BgpMacIpAdvNlriVer4(rd, esi,
+                                                                    ethernetTagID,
+                                                                    macAddress,
+                                                                    ipAddressLength,
+                                                                    ipAddress,
+                                                                    mplsLabel1,
+                                                                    mplsLabel2);
         BgpEvpnNlri nlri = new BgpEvpnNlriVer4(RouteType.MAC_IP_ADVERTISEMENT
                 .getType(), routeTypeSpec);
         eVpnComponents.add(nlri);

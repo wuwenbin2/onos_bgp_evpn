@@ -342,8 +342,6 @@ public class MpReachNlri implements BgpValueType {
             } else if ((afi == Constants.AFI_EVPN_VALUE)
                     && (safi == Constants.SAFI_EVPN_VALUE)) {
 
-                log.info("=====evpn nlri is being read with afi {} and saif {}", afi, safi);
-
                 List<BgpEvpnNlri> eVpnComponents = new LinkedList<>();
 
                 byte nextHopLen = tempCb.readByte();
@@ -354,10 +352,7 @@ public class MpReachNlri implements BgpValueType {
                 }
                 ipNextHop = Ip4Address.valueOf(ipAddress);
                 byte reserved = tempCb.readByte();
-
-                log.info("=====Reading NLRI======");
                 while (tempCb.readableBytes() > 0) {
-
                     BgpEvpnNlri eVpnComponent = BgpEvpnNlriVer4.read(tempCb);
                     eVpnComponents.add(eVpnComponent);
                     log.info("=====evpn Component is {} ======", eVpnComponent);
